@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dr. Elena Ruiz — Dermatology waitlist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1c1e1c; --ink-soft:#585b57; --ink-faint:#8b8d89;
+    --line:#dcdad2; --paper:#faf9f5; --card:#ffffff;
+    --teal-bg:#e1f5ee; --teal-line:#5dcaa5; --teal-text:#085041; --teal-solid:#0f6e56;
+    --coral-bg:#faece7; --coral-line:#f0997b; --coral-text:#712b13; --coral-solid:#d85a30;
+    --gray-bg:#f1efe8;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:40px 24px 80px; background:var(--paper); color:var(--ink); font-family:'Inter',system-ui,sans-serif;}
+  .wrap{max-width:900px; margin:0 auto;}
+
+  header{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; gap:16px; flex-wrap:wrap;}
+  h1{font-family:'Source Serif 4',Georgia,serif; font-weight:600; font-size:26px; margin:0 0 4px; letter-spacing:-0.01em;}
+  .clinic-sub{color:var(--ink-soft); font-size:14px; margin:0;}
+  .reset-btn{
+    font-size:13px; color:var(--ink-soft); background:var(--card); border:1px solid var(--line);
+    border-radius:8px; padding:8px 14px; cursor:pointer; white-space:nowrap;
+  }
+  .reset-btn:hover{border-color:var(--ink-faint);}
+
+  .switcher{
+    display:flex; gap:4px; background:var(--gray-bg); border-radius:10px; padding:4px;
+    width:fit-content; margin-bottom:28px;
+  }
+  .switcher button{
+    border:none; background:none; padding:9px 20px; font-size:14px; font-weight:500;
+    color:var(--ink-soft); border-radius:8px; cursor:pointer; font-family:inherit;
+  }
+  .switcher button.active{background:var(--card); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08);}
+
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:24px; margin-bottom:16px;}
+  .card h2{margin:0 0 6px; font-size:17px; font-weight:600;}
+  .card p{margin:0; font-size:14px; color:var(--ink-soft); line-height:1.55;}
+
+  .btn{
+    display:inline-flex; align-items:center; gap:6px; border:none; border-radius:8px;
+    padding:10px 18px; font-size:14px; font-weight:500; cursor:pointer; font-family:inherit;
+  }
+  .btn-primary{background:var(--teal-solid); color:#fff;}
+  .btn-primary:hover{background:var(--teal-text);}
+  .btn-secondary{background:var(--card); color:var(--ink); border:1px solid var(--line);}
+  .btn-secondary:hover{border-color:var(--ink-faint);}
+  .btn-decline{background:var(--card); color:var(--coral-text); border:1px solid var(--coral-line);}
+  .btn:disabled{opacity:.5; cursor:not-allowed;}
+
+  .banner{
+    display:flex; align-items:center; gap:10px; background:var(--teal-bg); color:var(--teal-text);
+    border-radius:10px; padding:12px 16px; font-size:14px; font-weight:500; margin-bottom:16px;
+  }
+  .bell{width:18px; height:18px; flex:none; margin-right:8px;}
+
+  .position-row{display:flex; align-items:center; gap:14px; margin:16px 0;}
+  .position-badge{
+    width:52px; height:52px; border-radius:50%; background:var(--teal-bg); color:var(--teal-text);
+    display:flex; align-items:center; justify-content:center; flex:none;
+    font-family:'Source Serif 4',Georgia,serif; font-size:20px; font-weight:600;
+  }
+  .position-text .label{font-size:14px; font-weight:600; color:var(--ink);}
+  .position-text .sub{font-size:13px; color:var(--ink-soft);}
+
+  .meta-row{display:flex; gap:24px; flex-wrap:wrap; margin-top:16px; padding-top:16px; border-top:1px solid var(--line);}
+  .meta-item{flex:1 1 150px; min-width:150px;}
+  .meta-item .k{font-size:11px; color:var(--ink-faint); letter-spacing:.02em; margin-bottom:4px;}
+  .meta-item .v{font-size:13px; color:var(--ink-soft); line-height:1.4;}
+
+  .stepper{display:flex; align-items:flex-start; margin-bottom:22px;}
+  .step{display:flex; flex-direction:column; align-items:center; flex:1; position:relative;}
+  .step .dot{width:12px; height:12px; border-radius:50%; background:var(--line); z-index:1;}
+  .step.done .dot, .step.current .dot{background:var(--teal-solid);}
+  .step .label{font-size:11px; color:var(--ink-faint); margin-top:8px; text-align:center;}
+  .step.done .label, .step.current .label{color:var(--teal-text); font-weight:500;}
+  .step:not(:last-child)::after{
+    content:''; position:absolute; top:5px; left:calc(50% + 10px); right:calc(-50% + 10px);
+    height:2px; background:var(--line);
+  }
+  .step.done:not(:last-child)::after{background:var(--teal-solid);}
+
+  .slot-card{
+    background:var(--teal-bg); border:1px solid var(--teal-line); border-radius:10px;
+    padding:18px 20px; margin:16px 0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+  }
+  .slot-card .when{font-size:15px; font-weight:600; color:var(--teal-text);}
+  .slot-card .sub{font-size:13px; color:var(--teal-text); opacity:.8;}
+  .slot-actions{display:flex; gap:10px;}
+
+  table{width:100%; border-collapse:collapse; font-size:14px;}
+  th{text-align:left; font-weight:500; color:var(--ink-soft); font-size:12px; text-transform:none; padding:0 12px 10px; border-bottom:1px solid var(--line);}
+  td{padding:14px 12px; border-bottom:1px solid var(--line); vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  .pos-cell{font-weight:600; width:36px;}
+  .status-pill{display:inline-block; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:500;}
+  .status-waiting{background:var(--gray-bg); color:var(--ink-soft);}
+  .status-notified{background:var(--teal-bg); color:var(--teal-text);}
+  .status-booked{background:var(--ink); color:#fff;}
+
+  .control-row{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    background:var(--gray-bg); border-radius:10px; padding:16px 20px; margin-bottom:20px;
+  }
+  .control-text{font-size:14px; color:var(--ink-soft);}
+  .control-text b{color:var(--ink); font-weight:600;}
+
+  .empty-state{text-align:center; padding:36px 20px;}
+  .empty-state p{margin-bottom:18px;}
+
+  .confirm{background:var(--teal-bg); border:1px solid var(--teal-line);}
+  .confirm h2{color:var(--teal-text);}
+
+  .footnote{font-size:12px; color:var(--ink-faint); margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Dr. Elena Ruiz</h1>
+      <p class="clinic-sub">Dermatology · 3 slots/day, 3 days/week</p>
+    </div>
+    <button class="reset-btn" onclick="resetDemo()">Reset demo</button>
+  </header>
+
+  <div class="switcher">
+    <button id="tab-patient" class="active" onclick="switchView('patient')">Patient view</button>
+    <button id="tab-staff" onclick="switchView('staff')">Staff view</button>
+  </div>
+
+  <!-- PATIENT VIEW -->
+  <div id="view-patient" class="view active"></div>
+
+  <!-- STAFF VIEW -->
+  <div id="view-staff" class="view">
+    <div id="staff-control"></div>
+    <div class="card" style="padding:0;">
+      <table>
+        <thead>
+          <tr><th style="width:36px;">#</th><th>Patient</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody id="staff-table-body"></tbody>
+      </table>
+    </div>
+    <p class="footnote">Positions recalculate automatically as patients are booked or removed — no one re-numbers the list by hand.</p>
+  </div>
+
+</div>
+
+<script>
+// ---- Data model ----
+// status: 'not_joined' | 'waiting' | 'notified' | 'booked'
+let patients = [
+  { id: 'carlos', name: 'Carlos Mendoza', status: 'waiting', isMe: false },
+  { id: 'maria',  name: 'Maria Gomez',    status: 'not_joined', isMe: true, joinedAt: null },
+  { id: 'ana',    name: 'Ana Torres',     status: 'waiting', isMe: false },
+  { id: 'luis',   name: 'Luis Fernández', status: 'waiting', isMe: false },
+];
+
+const SLOT_WHEN = 'Thursday, Oct 2 · 10:30 AM';
+
+function activeList(){
+  return patients.filter(p => p.status !== 'not_joined' && p.status !== 'booked');
+}
+function positionOf(p){
+  const list = activeList();
+  return list.indexOf(p) === -1 ? null : list.findIndex(x => x.id === p.id) + 1;
+}
+function me(){ return patients.find(p => p.isMe); }
+function notifiedPatient(){ return patients.find(p => p.status === 'notified'); }
+
+function joinWaitlist(){
+  me().status = 'waiting';
+  me().joinedAt = new Date();
+  render();
+}
+
+function formatDate(d){
+  if (!d) return '';
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[d.getMonth()] + ' ' + d.getDate();
+}
+
+function stepFor(status){
+  const map = { waiting: 1, notified: 2, booked: 3 };
+  return map[status] === undefined ? 0 : map[status];
+}
+
+function renderStepper(status){
+  const current = stepFor(status);
+  const steps = [
+    { key: 0, label: 'Joined' },
+    { key: 1, label: 'Waiting' },
+    { key: 2, label: 'Notified' },
+    { key: 3, label: 'Booked' },
+  ];
+  return `<div class="stepper">${steps.map(s => {
+    const cls = s.key < current ? 'done' : s.key === current ? 'current' : '';
+    return `<div class="step ${cls}"><div class="dot"></div><div class="label">${s.label}</div></div>`;
+  }).join('')}</div>`;
+}
+function markSlotOpen(){
+  const list = activeList().filter(p => p.status === 'waiting');
+  if (list.length === 0) return;
+  list[0].status = 'notified';
+  render();
+}
+function simulateNoResponse(){
+  const n = notifiedPatient();
+  if (!n) return;
+  const nextList = patients.filter(p => p.id !== n.id && p.status === 'waiting');
+  n.status = 'waiting';
+  if (nextList.length > 0) nextList[0].status = 'notified';
+  render();
+}
+function accept(){
+  me().status = 'booked';
+  render();
+}
+function decline(){
+  me().status = 'waiting';
+  const nextList = activeList().filter(p => p.status === 'waiting' && p.id !== me().id);
+  if (nextList.length > 0) nextList[0].status = 'notified';
+  render();
+}
+function resetDemo(){
+  patients = [
+    { id: 'carlos', name: 'Carlos Mendoza', status: 'waiting', isMe: false },
+    { id: 'maria',  name: 'Maria Gomez',    status: 'not_joined', isMe: true, joinedAt: null },
+    { id: 'ana',    name: 'Ana Torres',     status: 'waiting', isMe: false },
+    { id: 'luis',   name: 'Luis Fernández', status: 'waiting', isMe: false },
+  ];
+  switchView('patient');
+}
+
+function switchView(v){
+  document.getElementById('view-patient').classList.toggle('active', v === 'patient');
+  document.getElementById('view-staff').classList.toggle('active', v === 'staff');
+  document.getElementById('tab-patient').classList.toggle('active', v === 'patient');
+  document.getElementById('tab-staff').classList.toggle('active', v === 'staff');
+  render();
+}
+
+function bellIcon(){
+  return '<svg class="bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>';
+}
+
+function renderPatient(){
+  const el = document.getElementById('view-patient');
+  const m = me();
+  const total = activeList().length;
+
+  if (m.status === 'not_joined'){
+    el.innerHTML = `
+      <div class="card empty-state">
+        <h2>You're not on the waitlist yet</h2>
+        <p>Join Dr. Ruiz's waitlist and you'll see your position here — no need to call the office.</p>
+        <button class="btn btn-primary" onclick="joinWaitlist()">Join waitlist</button>
+      </div>`;
+    return;
+  }
+
+  if (m.status === 'waiting'){
+    el.innerHTML = `
+      <div class="card">
+        ${renderStepper(m.status)}
+        <h2>You're on the waitlist</h2>
+        <p>We'll notify you here the moment a slot opens. No need to call to check in.</p>
+        <div class="position-row">
+          <div class="position-badge">#${positionOf(m)}</div>
+          <div class="position-text">
+            <div class="label">Position ${positionOf(m)} of ${total}</div>
+            <div class="sub">Waiting for Dr. Ruiz · Dermatology</div>
+          </div>
+        </div>
+        <div class="meta-row">
+          <div class="meta-item"><div class="k">Joined</div><div class="v">${formatDate(m.joinedAt)}</div></div>
+          <div class="meta-item"><div class="k">Typical availability</div><div class="v">About 9 slots a week</div></div>
+          <div class="meta-item"><div class="k">Notifications</div><div class="v">Check here — no need to call</div></div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  if (m.status === 'notified'){
+    el.innerHTML = `
+      <div class="banner">${bellIcon()}<span>A slot just opened for you</span></div>
+      <div class="card">
+        ${renderStepper(m.status)}
+        <h2>You're on the waitlist</h2>
+        <div class="position-row">
+          <div class="position-badge">#${positionOf(m)}</div>
+          <div class="position-text">
+            <div class="label">Position ${positionOf(m)} of ${total}</div>
+            <div class="sub">Waiting for Dr. Ruiz · Dermatology</div>
+          </div>
+        </div>
+        <div class="slot-card">
+          <div>
+            <div class="when">${SLOT_WHEN}</div>
+            <div class="sub">With Dr. Elena Ruiz</div>
+          </div>
+          <div class="slot-actions">
+            <button class="btn btn-decline" onclick="decline()">Decline</button>
+            <button class="btn btn-primary" onclick="accept()">Accept</button>
+          </div>
+        </div>
+        <div class="meta-row">
+          <div class="meta-item"><div class="k">Joined</div><div class="v">${formatDate(m.joinedAt)}</div></div>
+          <div class="meta-item"><div class="k">If you don't respond</div><div class="v">Staff offers it to the next patient</div></div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  if (m.status === 'booked'){
+    el.innerHTML = `
+      <div class="card confirm">
+        ${renderStepper(m.status)}
+        <h2>You're booked</h2>
+        <p>${SLOT_WHEN} with Dr. Elena Ruiz. See you then — no call needed to confirm.</p>
+        <div class="meta-row">
+          <div class="meta-item"><div class="k">Joined waitlist</div><div class="v">${formatDate(m.joinedAt)}</div></div>
+          <div class="meta-item"><div class="k">Need to change this?</div><div class="v">Contact the office</div></div>
+        </div>
+      </div>`;
+    return;
+  }
+}
+
+function renderStaffControl(){
+  const control = document.getElementById('staff-control');
+  const n = notifiedPatient();
+  const waitingCount = patients.filter(p => p.status === 'waiting').length;
+
+  if (n){
+    control.innerHTML = `
+      <div class="control-row">
+        <div class="control-text">Waiting on <b>${n.name}</b>'s response to the open slot.</div>
+        <button class="btn btn-secondary" onclick="simulateNoResponse()">No response — offer to next patient</button>
+      </div>`;
+  } else if (waitingCount > 0) {
+    control.innerHTML = `
+      <div class="control-row">
+        <div class="control-text">No open offer right now.</div>
+        <button class="btn btn-primary" onclick="markSlotOpen()">Mark next slot open</button>
+      </div>`;
+  } else {
+    control.innerHTML = `
+      <div class="control-row">
+        <div class="control-text">No patients currently waiting.</div>
+      </div>`;
+  }
+}
+
+function renderStaffTable(){
+  const body = document.getElementById('staff-table-body');
+  const joined = patients.filter(p => p.status !== 'not_joined');
+  const list = activeList();
+
+  body.innerHTML = joined.map(p => {
+    const pos = p.status === 'booked' ? '—' : (list.findIndex(x => x.id === p.id) + 1);
+    const pillClass = 'status-' + p.status;
+    const label = p.status === 'waiting' ? 'Waiting' : p.status === 'notified' ? 'Notified' : 'Booked';
+    return `<tr>
+      <td class="pos-cell">${pos}</td>
+      <td>${p.name}${p.isMe ? ' <span style="color:var(--ink-faint);font-size:12px;">(you)</span>' : ''}</td>
+      <td><span class="status-pill ${pillClass}">${label}</span></td>
+      <td></td>
+    </tr>`;
+  }).join('');
+}
+
+function render(){
+  renderPatient();
+  renderStaffControl();
+  renderStaffTable();
+}
+
+render();
+</script>
+</body>
+</html>
