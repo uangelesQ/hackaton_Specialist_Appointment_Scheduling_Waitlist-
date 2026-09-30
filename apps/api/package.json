@@ -1,0 +1,23 @@
+{
+  "name": "@waitlist/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "vitest run",
+    "migrate": "tsx src/db/migrate-cli.ts",
+    "seed": "tsx src/db/seed-cli.ts"
+  },
+  "dependencies": {
+    "@waitlist/shared": "*",
+    "better-sqlite3": "^12.0.0",
+    "knex": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.0",
+    "vitest": "^3.0.0"
+  }
+}

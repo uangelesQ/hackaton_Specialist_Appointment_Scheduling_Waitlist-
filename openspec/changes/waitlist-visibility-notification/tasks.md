@@ -2,9 +2,9 @@
 
 ## 1. Project scaffolding
 
-- [ ] 1.1 Create monorepo with `apps/api`, `apps/web` and `packages/shared` (TypeScript, strict mode) and verify `npm install` and `npm run build` succeed
-- [ ] 1.2 Configure Vitest for api and web, plus a lint script, and verify `npm test` runs with one passing placeholder test
-- [ ] 1.3 Add SQLite with migrations and a seed script for the specialist, patients and staff, and verify `npm run seed` populates them
+- [x] 1.1 Create monorepo with `apps/api`, `apps/web` and `packages/shared` (TypeScript, strict mode) and verify `npm install` and `npm run build` succeed
+- [x] 1.2 Configure Vitest for api and web, plus a lint script, and verify `npm test` runs with one passing placeholder test
+- [x] 1.3 Add SQLite with migrations and a seed script for the specialist, patients and staff, and verify `npm run seed` populates them
 
 ## 2. Auth and data layer
 
