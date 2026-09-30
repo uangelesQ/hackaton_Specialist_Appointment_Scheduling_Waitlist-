@@ -1,32 +1,43 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Read by the harness (/sdd-apply, /sdd-verify); ignored by plain OpenSpec.
+strict_tdd: true
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+context: |
+  Product: Specialist Appointment Scheduling & Waitlist. Current feature: Waitlist Visibility & Slot Availability Notification (PS-001 v0.2, MVP).
+  Sources: docs/PS-001-Waitlist-Visibility-NotificationV2.md (stories US-001..US-007, BR-001..BR-004), docs/PRD-specialist-appointment-waitlist.md, docs/prototype-walkthrough_V2.md.
+  UI visual reference: docs/waitlist-prototype_V2.html (layout, colours, type). It has no leave/add/remove controls, specialist selector or login; build those in the same style.
+  Tech stack: TypeScript (strict), monorepo apps/api + apps/web + packages/shared. API: Node, Express, Zod, SQLite behind a repository layer, JWT auth with roles patient|staff. Web: React, Vite, React Query. Tests: Vitest, Supertest.
+  Out of scope (deferred to "Slot Claim & Booking Confirmation"): claiming or booking a slot, Accept/Decline, response windows, cascading offers, email/SMS. Do not build or infer them.
+  Decisions taken by assumption, pending Product Owner confirmation: FIFO ordering by join time; in-app notification only behind a channel interface; one active entry per patient per specialist; compliance framework still open.
+  Conventions: position is computed on read, never stored. No PII (names, patient identifiers) in logs or error messages. Every entry create/remove is audited in the same transaction. Code, comments and UI copy in English. Conventional commits.
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+rules:
+  proposal:
+    - Reference user stories (US-xxx) and business rules (BR-xxx) by ID
+    - List decisions taken by assumption and anything deferred to the Slot Claim feature
+  specs:
+    - Use Given/When/Then style scenarios (WHEN/THEN) and RFC 2119 keywords (SHALL, MUST, SHOULD, MAY)
+    - Name the user story or business rule each requirement traces to
+    - Do not specify behaviour that belongs to the deferred Slot Claim feature
+  design:
+    - Document decisions with rationale and the alternative rejected
+    - State which prototype screens and states each UI decision is based on, and what the prototype does not cover
+    - Use Mermaid for any diagram, never ASCII art
+  tasks:
+    - Group by numbered phase; each task is completable in one session
+    - Every task ends with a concrete verification (the test or check that proves it)
+    - Tag tasks with the spec requirement or scenario they satisfy
+
+operations:
+  apply:
+    guidance:
+      - Work one numbered task group at a time and stop after each group for review
+      - Write the test first where a test runner exists; run the task's verification before ticking its checkbox
+      - Reuse existing helpers and shared types before adding new ones
+      - Never implement Accept/Decline, booking, or cascading offers, even though the prototype shows them
+      - Keep PII out of logs and error messages
+      - Stop and ask if a task needs behaviour the specs or design do not describe
+  archive:
+    guidance:
+      - Summarize which specs were merged into openspec/specs and any assumptions still awaiting Product Owner confirmation
