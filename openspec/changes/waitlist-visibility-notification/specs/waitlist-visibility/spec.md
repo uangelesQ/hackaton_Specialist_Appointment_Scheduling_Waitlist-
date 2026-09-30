@@ -2,58 +2,70 @@
 
 ## Purpose
 
-Defines what patients and scheduling staff can see about a specialist's waitlist, including how a patient's position is determined, so neither party needs a phone call to learn the current state.
+Defines what patients and scheduling staff can see about the waitlist, including how position is determined, so neither party needs a phone call to learn the current state.
 
 ## ADDED Requirements
 
-### Requirement: Waitlist position is ordered by join time
-The system SHALL order active entries for a specialist by join time, earliest first (FIFO). Position SHALL be the 1-based rank of an entry among active entries for that specialist. Inactive entries SHALL be excluded.
+### Requirement: Waitlist position is FIFO by join date
+The system SHALL order active entries by join time, earliest first, with no priority or urgency override. Position SHALL be the 1-based rank of an entry among active entries (`waiting` and `notified`). Closed entries SHALL be excluded.
 
 #### Scenario: Earlier join ranks first
-- **WHEN** patient A joins specialist S's waitlist before patient B
+- **WHEN** patient A joins before patient B
 - **THEN** A's position is lower than B's
 
 #### Scenario: Staff-added entry uses creation time
-- **WHEN** a staff member adds a patient to S's waitlist
+- **WHEN** a staff member adds a patient
 - **THEN** the entry's position is determined by the time staff created it
 
-#### Scenario: Removal moves others up
-- **WHEN** an active entry ahead of patient B is removed
-- **THEN** B's displayed position decreases by one
+#### Scenario: Closing an entry moves others up
+- **WHEN** an entry ahead of patient B closes as `booked` or `removed`
+- **THEN** B's displayed position decreases by one, without any manual renumbering
+
+#### Scenario: Notified entry keeps its position
+- **WHEN** a patient's entry changes from `waiting` to `notified`, or back
+- **THEN** its position is unchanged
 
 ### Requirement: Patient views own position
-The system SHALL show a patient the current position of each of their active entries, reflecting current state at the time of viewing.
+The system SHALL show a patient their current position as a plain number in the form "#N", together with the date they joined. The total number of patients waiting SHALL NOT be shown. The position SHALL reflect current state at the time of viewing.
 
 #### Scenario: Patient views position
-- **WHEN** a patient with an active entry for specialist S views their waitlist status
-- **THEN** their current position for S is displayed as "#N", with no total count, together with the date they joined
+- **WHEN** a patient with an active entry views their waitlist status
+- **THEN** their position is displayed as "#N" with the join date, and no total count
 
 #### Scenario: Position is current
-- **WHEN** another entry is added or removed and the patient then views their status
+- **WHEN** another entry is added or closed and the patient then views their status
 - **THEN** the displayed position reflects that change
 
 #### Scenario: No active entry
-- **WHEN** a patient with no active entry for specialist S views their status for S
-- **THEN** the system shows that they are not on S's waitlist
+- **WHEN** a patient with no active entry views their status
+- **THEN** the system shows that they are not on the waitlist and offers to join
 
-### Requirement: Staff views a specialist's waitlist
-The system SHALL let scheduling staff open a specialist's waitlist and see all active entries, each with the patient's identity and position, in position order.
+### Requirement: Staff views the waitlist
+The system SHALL let scheduling staff open the specialist's waitlist and see all active entries, each with the patient's identity, position and status, in position order. Closed entries SHALL NOT be listed.
 
 #### Scenario: Staff opens waitlist
-- **WHEN** a staff member opens the waitlist of a specialist with active entries
-- **THEN** all active entries are listed with patient identity and position
+- **WHEN** a staff member opens the waitlist with active entries
+- **THEN** all active entries are listed with patient identity, position and status
 
-#### Scenario: Positions recalculate without manual renumbering
-- **WHEN** an entry is added or removed
-- **THEN** the staff list shows updated positions for all remaining entries without any manual renumbering
+#### Scenario: Closed entries excluded
+- **WHEN** an entry has closed as `booked` or `removed`
+- **THEN** it is not in the staff list and not counted in positions
 
 #### Scenario: Empty waitlist
-- **WHEN** a staff member opens the waitlist of a specialist with no active entries
-- **THEN** the system shows an empty waitlist
+- **WHEN** a staff member opens the waitlist with no active entries
+- **THEN** the view states that no patients are waiting and offers no release action
+
+#### Scenario: Outstanding offer is visible
+- **WHEN** an offer is outstanding
+- **THEN** the staff view shows which patient holds it
 
 ### Requirement: Waitlist data is access-controlled
-The system SHALL NOT reveal other patients' identities or positions to patients. Only staff SHALL see the full waitlist.
+The system SHALL treat waitlist data as personal data. A patient SHALL see only their own record. Staff SHALL see only the specialist they administer. Patient names and other personal details SHALL NOT appear in logs.
 
 #### Scenario: Patient cannot view full list
-- **WHEN** a patient requests the full waitlist of a specialist
+- **WHEN** a patient requests the full waitlist
+- **THEN** the system denies the request
+
+#### Scenario: Patient cannot view another patient's entry
+- **WHEN** a patient requests another patient's entry
 - **THEN** the system denies the request
