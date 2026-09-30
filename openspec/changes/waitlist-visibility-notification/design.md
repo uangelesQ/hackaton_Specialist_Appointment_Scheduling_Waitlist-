@@ -38,7 +38,15 @@ Greenfield: the repo has no application code. Stack is TypeScript, Node (API) an
 
 **Audit log written in the same transaction as entry create/remove**, recording actor type and id plus timestamp. Logs and errors must not include patient names or other PII, as a baseline until the compliance framework is chosen.
 
-**React UI:** patient views (join, my positions, notifications list with mark-read) and staff views (specialist waitlist, add patient, remove entry). The prototype in `docs/waitlist-prototype.html` is the visual reference; UX wireframes are not yet available and are not a dependency.
+**Demo slot trigger:** `POST /specialists/:id/slot-events/demo`, staff role only, registered only when `DEMO_MODE=true`. It calls the same service function as the cancellation hook, so there is one slot-event path. Alternative: a manual-slot feature for staff; rejected because PS-001 allows advance cancellation as the only slot source.
+
+**React UI:** `docs/waitlist-prototype_V2.html` is the visual reference for layout and styling (cards, position badge, meta row, notification banner, staff table, buttons, colours and type). Patient views: join, position shown as "#N" with the joined date, leave, notifications list with mark-read. Staff views: specialist waitlist (position, patient, joined date), add patient, remove entry, and the demo-only "Mark next slot open" control. The prototype has no leave, add or remove controls, no specialist selector and no login screen; these are built in the same style and are pending UX wireframes, which are not a dependency.
+
+**Not built from the prototype:** Accept/Decline with the "Book this appointment?" modal, the Booked status and confirmation screen, "No response, offer to next patient", one-at-a-time notification, and per-patient status pills beyond entry state. These belong to the deferred claim flow and need an updated PS-001 before they are planned.
+
+## Open Questions
+
+- Which slot time does the demo control use? The prototype hard-codes "Thursday, Oct 2 · 10:30 AM"; this design assumes a configured demo slot time until the Product Owner says otherwise.
 
 ## Risks / Trade-offs
 

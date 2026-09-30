@@ -19,7 +19,13 @@ Decisions taken for this proposal to resolve PS-001 Open Decisions (to be confir
 - **Multi-entry (BR-004):** one active entry per patient per specialist. A patient may be on several specialists' waitlists. A duplicate join is rejected.
 - **Compliance framework:** still open. Treated as a design constraint (access control, audit trail, no PII in logs) without naming a framework.
 
-Out of scope: slot claim/booking, response windows, cascading the offer to the next patient (deferred Slot Claim & Booking Confirmation spec).
+UI reference: `docs/waitlist-prototype_V2.html` (layout and styling). The patient view shows the position as "#N" only. Leave, staff add and staff remove are not in the prototype; they are built in the prototype's style, pending UX wireframes.
+
+Demo trigger: besides the simulated cancellation hook, a demo-only staff control ("Mark next slot open") calls that same hook. It is not a separate slot source.
+
+Pending Product Owner update of PS-001: the prototype's claim flow (one-at-a-time notification, Accept/Decline with confirm, Booked status, "No response" cascade) is not planned here until the PS defines it.
+
+Out of scope until then: slot claim/booking, response windows, cascading the offer to the next patient (deferred Slot Claim & Booking Confirmation spec).
 
 ## Capabilities
 

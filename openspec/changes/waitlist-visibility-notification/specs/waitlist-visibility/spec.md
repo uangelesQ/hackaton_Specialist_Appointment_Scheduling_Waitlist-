@@ -26,7 +26,7 @@ The system SHALL show a patient the current position of each of their active ent
 
 #### Scenario: Patient views position
 - **WHEN** a patient with an active entry for specialist S views their waitlist status
-- **THEN** their current position for S is displayed
+- **THEN** their current position for S is displayed as "#N", with no total count, together with the date they joined
 
 #### Scenario: Position is current
 - **WHEN** another entry is added or removed and the patient then views their status
@@ -42,6 +42,10 @@ The system SHALL let scheduling staff open a specialist's waitlist and see all a
 #### Scenario: Staff opens waitlist
 - **WHEN** a staff member opens the waitlist of a specialist with active entries
 - **THEN** all active entries are listed with patient identity and position
+
+#### Scenario: Positions recalculate without manual renumbering
+- **WHEN** an entry is added or removed
+- **THEN** the staff list shows updated positions for all remaining entries without any manual renumbering
 
 #### Scenario: Empty waitlist
 - **WHEN** a staff member opens the waitlist of a specialist with no active entries

@@ -17,6 +17,21 @@ The system SHALL raise a slot-availability event for a specialist when a booked 
 - **WHEN** a cancellation is recorded for an appointment whose time has already passed
 - **THEN** no slot-availability event is raised
 
+### Requirement: Demo-only staff control raises a slot event
+The system SHALL provide, only when demo mode is enabled, a staff control "Mark next slot open" for a specialist that raises the same slot-availability event as an advance cancellation. It SHALL NOT be a separate source of slots and SHALL NOT be available outside demo mode.
+
+#### Scenario: Staff marks next slot open in demo mode
+- **WHEN** demo mode is enabled and a staff member uses "Mark next slot open" for specialist S
+- **THEN** a slot-availability event is raised for S through the same path as a cancellation, and notifications follow the same rules
+
+#### Scenario: Control unavailable outside demo mode
+- **WHEN** demo mode is disabled
+- **THEN** the control is not shown and the endpoint rejects the request
+
+#### Scenario: Patient cannot use the control
+- **WHEN** a patient attempts to raise a slot event through the demo control
+- **THEN** the system rejects the request
+
 ### Requirement: Active entries are notified of an available slot
 The system SHALL, when a slot-availability event is raised for a specialist, deliver an in-app notification to every patient with an active entry for that specialist. The notification SHALL identify the specialist and the slot time.
 

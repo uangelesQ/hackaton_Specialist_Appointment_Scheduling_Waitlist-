@@ -33,15 +33,18 @@
 - [ ] 5.3 Implement fan-out to all active entries with idempotency and per-patient failure isolation, and verify tests for multiple entries, inactive excluded, no entries, reprocessing without duplicates and one failing patient
 - [ ] 5.4 Verify notification leaves entry active and position unchanged (BR-003) with a test
 - [ ] 5.5 Implement `GET /me/notifications` and `PATCH /me/notifications/:id/read` and verify tests for listing and marking read
+- [ ] 5.6 Implement staff-only `POST /specialists/:id/slot-events/demo`, registered only when `DEMO_MODE=true` and calling the same service as the cancellation hook, and verify tests for demo mode on, demo mode off (rejected) and patient caller (rejected)
 
-## 6. Web UI
+## 6. Web UI (visual reference: `docs/waitlist-prototype_V2.html`)
 
-- [ ] 6.1 Build login and role-based routing for patient and staff and verify component tests for each role's landing view
-- [ ] 6.2 Build patient views: join a specialist's waitlist, my positions, leave waitlist, and verify component tests with mocked API for each action and error states (duplicate join)
-- [ ] 6.3 Build patient notifications list with mark-as-read and periodic refresh, and verify a component test that a new notification appears and can be marked read
-- [ ] 6.4 Build staff views: specialist waitlist table, add patient, remove entry, and verify component tests for each action and empty state
+- [ ] 6.1 Set up shared styles and components (cards, position badge, meta row, banner, table, buttons) matching the prototype's colours and type, and verify a rendered component test for each
+- [ ] 6.2 Build login and role-based routing for patient and staff and verify component tests for each role's landing view
+- [ ] 6.3 Build patient views: join a specialist's waitlist, position shown as "#N" with the joined date, leave waitlist, and verify component tests with mocked API for each action, the not-on-waitlist empty state, and error states (duplicate join)
+- [ ] 6.4 Build patient notification banner and notifications list with mark-as-read and periodic refresh, with no Accept/Decline, and verify a component test that a new notification appears, can be marked read, and shows no booking actions
+- [ ] 6.5 Build staff views: specialist waitlist table (position, patient, joined date), add patient, remove entry, and verify component tests for each action, positions updating after removal, and the empty state
+- [ ] 6.6 Add the demo-only "Mark next slot open" staff control, shown only in demo mode, and verify a component test that it calls the demo endpoint and is hidden when demo mode is off
 
 ## 7. Integration and documentation
 
 - [ ] 7.1 Add an end-to-end integration test: patient joins, staff views, cancellation raises event, patient notified, entry still active, patient leaves; verify it passes in CI
-- [ ] 7.2 Write the README with setup, seeded users, the simulated cancellation hook, and the assumptions awaiting Product Owner confirmation, and verify the documented setup commands run as written
+- [ ] 7.2 Write the README with setup, seeded users, the simulated cancellation hook, the demo control and `DEMO_MODE`, and the assumptions awaiting Product Owner confirmation, and verify the documented setup commands run as written
