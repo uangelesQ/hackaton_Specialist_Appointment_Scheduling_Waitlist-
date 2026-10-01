@@ -22,9 +22,9 @@
 
 ## 4. Waitlist visibility (waitlist-visibility)
 
-- [ ] 4.1 Implement position calculation (FIFO by `joined_at`, tie-break by id, `waiting` and `notified` only) and verify unit tests for ordering, staff-added entries, unchanged position on notify, and move-up when an entry closes as `booked` or `removed`
-- [ ] 4.2 Implement `GET /me/waitlist` returning the patient's own entry with position as a number, join date and any outstanding offer, with no total count, and verify tests for current position, not-on-waitlist, and denial of other patients' entries
-- [ ] 4.3 Implement `GET /waitlist` for staff with patient identity, position, status, the offer holder, and closed entries excluded, and verify tests for populated, empty and patient-denied cases
+- [x] 4.1 Implement position calculation (FIFO by `joined_at`, tie-break by id, `waiting` and `notified` only) and verify unit tests for ordering, staff-added entries, unchanged position on notify, and move-up when an entry closes as `booked` or `removed`
+- [x] 4.2 Implement `GET /me/waitlist` returning the patient's own entry with position as a number, join date and any outstanding offer, with no total count, and verify tests for current position, not-on-waitlist, and denial of other patients' entries
+- [x] 4.3 Implement `GET /waitlist` for staff with patient identity, position, status, the offer holder, and closed entries excluded, and verify tests for populated, empty and patient-denied cases
 
 ## 5. Slot offers (slot-offers)
 

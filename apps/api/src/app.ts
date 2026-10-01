@@ -4,6 +4,7 @@ import { authenticate } from './auth/auth.js';
 import { errorHandler } from './http/errors.js';
 import type { Clock } from './repositories/index.js';
 import { waitlistRouter } from './routes/waitlist.js';
+import { waitlistViewRouter } from './routes/waitlistView.js';
 
 export interface AppDeps {
   db: Knex;
@@ -18,6 +19,7 @@ export function createApp({ db, jwtSecret, clock }: AppDeps) {
   // Every route below requires a valid token. Public routes (login) must be mounted above this line.
   app.use(authenticate(jwtSecret));
   app.use(waitlistRouter(db, clock));
+  app.use(waitlistViewRouter(db, clock));
 
   app.use(errorHandler);
   return app;
