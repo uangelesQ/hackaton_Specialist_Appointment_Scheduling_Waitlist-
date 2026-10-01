@@ -8,9 +8,9 @@
 
 ## 2. Auth and data layer
 
-- [ ] 2.1 Create migrations for `waitlist_entries` (partial unique index on active patient), `slots`, `slot_offers` (partial unique index on outstanding) and `audit_log`, and verify tests that a duplicate active entry and a second outstanding offer both fail at the database level
-- [ ] 2.2 Implement token auth middleware with `patient` and `staff` roles and verify tests for missing token (401), wrong role (403) and patient scoping to own entry
-- [ ] 2.3 Implement repository layer for entries, slots, offers and audit with transaction support, and verify repository tests pass
+- [x] 2.1 Create migrations for `waitlist_entries` (partial unique index on active patient), `slots`, `slot_offers` (partial unique index on outstanding) and `audit_log`, and verify tests that a duplicate active entry and a second outstanding offer both fail at the database level
+- [x] 2.2 Implement token auth middleware with `patient` and `staff` roles and verify tests for missing token (401), wrong role (403) and patient scoping to own entry
+- [x] 2.3 Implement repository layer for entries, slots, offers and audit with transaction support, and verify repository tests pass
 
 ## 3. Waitlist membership (waitlist-membership)
 
