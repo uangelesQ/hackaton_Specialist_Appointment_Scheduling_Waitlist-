@@ -1,22 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c172785e-cc69-4959-ace7-1b794f5b6e17" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/apps/web/public/els-logo.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/auth/auth.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/auth/auth.test.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/routes/demo.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/routes/demo.test.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/routes/offers.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/routes/offers.test.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/routes/waitlist.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/routes/waitlist.test.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/routes/waitlistView.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/routes/waitlistView.test.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/test/testApp.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/test/testApp.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/tsconfig.tsbuildinfo" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/vitest.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/vitest.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/openspec/changes/waitlist-visibility-notification/tasks.md" beforeDir="false" afterPath="$PROJECT_DIR$/openspec/changes/waitlist-visibility-notification/tasks.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/openspec/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/openspec/config.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/shared/tsconfig.tsbuildinfo" beforeDir="false" />
-    </list>
+    <list default="true" id="c172785e-cc69-4959-ace7-1b794f5b6e17" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

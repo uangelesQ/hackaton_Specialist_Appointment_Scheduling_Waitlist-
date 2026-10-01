@@ -14,6 +14,7 @@ High-demand specialist appointments are waitlisted manually by staff and communi
 - One outstanding offer at a time (BR-007). Entries move through `waiting`, `notified`, `booked` and `removed`, and positions close up automatically when an entry closes (BR-008). Removing a patient who holds an offer closes the offer (BR-009).
 - Every creation, removal, release, accept, decline and pass-on records who did it and when.
 - New greenfield application: TypeScript, Node API, React UI.
+- Added during apply (tasks 2.4 to 2.6): a demo-only sign-in that stands in for an identity provider, a staff-only patient lookup for the add form, and an API server entry point.
 
 Decisions carried from PS-001 v0.4 (resolved there): FIFO by join date, in-app banner only with no notification centre, one active entry per patient per specialist, single specialist in a single clinic, staff-manual reassignment.
 
@@ -21,6 +22,9 @@ Decisions made in this plan where the PS is silent (to be confirmed by the Produ
 - Staff enter the slot date and time when releasing. A slot returned by a decline, pass-on or removal stays open with the same date and time and is released again by staff.
 - If every waiting patient has already declined the current slot, no release action is offered and the slot stays open.
 - After a pass-on, "the next patient" is the next waiting patient behind the passed patient in FIFO order who has not declined that slot.
+- Dates and times are shown in the viewer's time zone, and a slot time staff enter is read in the staff member's time zone. The clinic's own time zone is not modelled.
+- A slot date and time in the past is accepted on release.
+- The "You're booked" confirmation is shown once, from the accept response. A closed entry is not returned by the API, so a later visit shows the patient as not on the waitlist.
 - Compliance framework: still open; baseline controls follow the PS working assumption (waitlist data is PII, a patient sees only their own record, staff see only the specialist they administer).
 
 UI reference: `docs/waitlist-prototype_V2.html` (layout and styling). Where V2 differs from the PS, the PS wins: declining does not cascade automatically, and closed (booked/removed) entries are not shown in the staff table. Patient leave, staff add and staff remove are not in V2; they are built in its style, pending UX wireframes.

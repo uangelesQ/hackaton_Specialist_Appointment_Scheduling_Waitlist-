@@ -16,11 +16,11 @@ context: |
 rules:
   proposal:
     - Reference user stories (US-xxx) and business rules (BR-xxx) by ID
-    - List decisions taken by assumption and anything deferred to the Slot Claim feature
+    - List decisions taken by assumption and anything the product spec defers
   specs:
     - Use Given/When/Then style scenarios (WHEN/THEN) and RFC 2119 keywords (SHALL, MUST, SHOULD, MAY)
     - Name the user story or business rule each requirement traces to
-    - Do not specify behaviour that belongs to the deferred Slot Claim feature
+    - Do not specify behaviour the product spec defers (an automatic timer or cascade, staff-confirmed booking, email/SMS, or a notification centre)
   design:
     - Document decisions with rationale and the alternative rejected
     - State which prototype screens and states each UI decision is based on, and what the prototype does not cover

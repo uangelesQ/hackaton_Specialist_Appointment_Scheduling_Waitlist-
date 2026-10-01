@@ -50,6 +50,17 @@ The system SHALL allow scheduling staff to add a patient without an active entry
 - **WHEN** a staff member adds a patient with no active entry
 - **THEN** an entry with status `waiting` is created, visible to the patient and eligible for offers
 
+### Requirement: Staff chooses from registered patients
+The system SHALL let scheduling staff see the registered patients, each marked as already on the waitlist or not, so they can pick one to add (US-006). Patients SHALL NOT be able to list other patients.
+
+#### Scenario: Staff sees who can be added
+- **WHEN** a staff member opens the add-patient form
+- **THEN** the registered patients are listed, each marked as on the waitlist or not, and patients already on the waitlist are not offered for adding
+
+#### Scenario: Patient cannot list patients
+- **WHEN** a patient requests the list of registered patients
+- **THEN** the system denies the request and reveals no names
+
 ### Requirement: Patient removes themselves
 The system SHALL allow a patient to remove their own active entry. The entry becomes `removed`, is excluded from position calculations, and every entry behind it moves up one position.
 
