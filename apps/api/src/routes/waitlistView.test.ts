@@ -150,7 +150,11 @@ describe('waitlist visibility', () => {
       const res = await staffList();
 
       expect(res.status).toBe(200);
-      expect(res.body).toEqual({ entries: [], offer: null });
+      expect(res.body).toEqual({
+        entries: [],
+        offer: null,
+        release: { available: false, reason: 'no_waiting_patients', openSlotStartsAt: null },
+      });
     });
 
     it('shows which patient holds the outstanding offer', async () => {

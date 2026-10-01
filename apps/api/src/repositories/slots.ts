@@ -23,6 +23,12 @@ export function slotRepository(db: Knex | Knex.Transaction) {
       return row && toRecord(row);
     },
 
+    /** The returned slot waiting to be released again, if any. There is at most one at a time. */
+    async findOpen(): Promise<SlotRecord | undefined> {
+      const row = await table().where({ status: 'open' }).orderBy('id').first();
+      return row && toRecord(row);
+    },
+
     async setStatus(id: number, status: SlotStatus): Promise<void> {
       await table().where({ id }).update({ status });
     },

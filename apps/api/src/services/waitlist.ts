@@ -86,6 +86,21 @@ export function waitlistService(db: Knex, clock?: Clock) {
           if (!closed) throw new HttpError(409, 'entry_not_active');
 
           await repos.audit.record({ action: 'entry_removed', entryId, actorType: actor.type, actorId: actor.id });
+
+          // Removing the offer holder closes their offer; the slot returns to staff and nobody else is notified.
+          if (entry.status === 'notified') {
+            const offer = await repos.offers.findOutstanding();
+            if (offer?.entryId === entryId && (await repos.offers.resolveIfOutstanding(offer.id, 'closed'))) {
+              await repos.slots.setStatus(offer.slotId, 'open');
+              await repos.audit.record({
+                action: 'offer_closed',
+                entryId,
+                slotId: offer.slotId,
+                actorType: actor.type,
+                actorId: actor.id,
+              });
+            }
+          }
           return { id: entryId, status: 'removed' };
         },
         clock,

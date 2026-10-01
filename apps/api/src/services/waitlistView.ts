@@ -1,6 +1,7 @@
 import type { Knex } from 'knex';
 import type { EntryStatus } from '@waitlist/shared';
 import { withTransaction, type Clock } from '../repositories/index.js';
+import { nextEligibleEntry } from './offers.js';
 import { assignPositions } from './position.js';
 
 export interface OfferBanner {
@@ -27,9 +28,20 @@ export interface StaffEntryView {
   holdsOffer: boolean;
 }
 
+export type ReleaseBlockReason = 'offer_outstanding' | 'no_waiting_patients' | 'all_waiting_declined';
+
+/** Whether staff can release a slot now. When not, `reason` says why and no release action should be shown. */
+export interface ReleaseState {
+  available: boolean;
+  reason: ReleaseBlockReason | null;
+  /** Date and time of a returned slot that will be reused; null when staff must enter one. */
+  openSlotStartsAt: string | null;
+}
+
 export interface StaffWaitlistView {
   entries: StaffEntryView[];
   offer: { id: number; entryId: number; slotStartsAt: string } | null;
+  release: ReleaseState;
 }
 
 /** Read-only views. Every call reads current data in one transaction, so nothing here can go stale. */
@@ -75,6 +87,17 @@ export function waitlistViewService(db: Knex, clock?: Clock) {
           const outstanding = await repos.offers.findOutstanding();
           const slot = outstanding && (await repos.slots.findById(outstanding.slotId));
 
+          const returned = await repos.slots.findOpen();
+          const openSlotStartsAt = returned?.startsAt ?? null;
+          let release: ReleaseState = { available: true, reason: null, openSlotStartsAt };
+          if (outstanding) {
+            release = { available: false, reason: 'offer_outstanding', openSlotStartsAt };
+          } else if (!active.some((e) => e.status === 'waiting')) {
+            release = { available: false, reason: 'no_waiting_patients', openSlotStartsAt };
+          } else if (!(await nextEligibleEntry(repos, returned?.id ?? null))) {
+            release = { available: false, reason: 'all_waiting_declined', openSlotStartsAt };
+          }
+
           return {
             entries: active.map((e) => ({
               id: e.id,
@@ -89,6 +112,7 @@ export function waitlistViewService(db: Knex, clock?: Clock) {
               outstanding && slot
                 ? { id: outstanding.id, entryId: outstanding.entryId, slotStartsAt: slot.startsAt }
                 : null,
+            release,
           };
         },
         clock,

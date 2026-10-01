@@ -28,13 +28,13 @@
 
 ## 5. Slot offers (slot-offers)
 
-- [ ] 5.1 Implement staff `POST /offers` (release with slot date and time) that notifies the lowest-position eligible `waiting` patient, and verify tests for position 1 offered, no waiting patients, release blocked while an offer is outstanding, and two concurrent releases producing one offer
-- [ ] 5.2 Implement returned slots: a declined, unassigned or holder-removed slot stays `open` and release reuses its date and time, skipping patients who declined it, and verify tests for skip-decliner and all-waiting-declined (no release action)
-- [ ] 5.3 Implement patient `POST /offers/:id/accept` booking the slot and closing the entry as `booked`, and verify tests for booking, entries behind moving up, non-holder rejected, and offer no longer outstanding rejected
-- [ ] 5.4 Implement patient `POST /offers/:id/decline` returning the entry to `waiting` at the same position with no automatic notification of the next patient, and verify tests for position kept and nobody else notified
-- [ ] 5.5 Implement staff `POST /offers/:id/pass` moving the holder back to `waiting` and notifying the next eligible patient behind them, and verify tests for next patient notified, only patient on the waitlist (no new offer), and an accept racing a pass-on (one wins)
-- [ ] 5.6 Close the outstanding offer when its holder is removed (patient or staff) and return the slot to staff, and verify tests that nobody else is notified and the slot can be released again
-- [ ] 5.7 Write audit records for release, accept, decline, pass-on and closure in the same transaction as each state change, and verify tests assert actor, slot and timestamp, and that a failure mid-transition leaves entry, offer and slot consistent
+- [x] 5.1 Implement staff `POST /offers` (release with slot date and time) that notifies the lowest-position eligible `waiting` patient, and verify tests for position 1 offered, no waiting patients, release blocked while an offer is outstanding, and two concurrent releases producing one offer
+- [x] 5.2 Implement returned slots: a declined, unassigned or holder-removed slot stays `open` and release reuses its date and time, skipping patients who declined it, and verify tests for skip-decliner and all-waiting-declined (no release action)
+- [x] 5.3 Implement patient `POST /offers/:id/accept` booking the slot and closing the entry as `booked`, and verify tests for booking, entries behind moving up, non-holder rejected, and offer no longer outstanding rejected
+- [x] 5.4 Implement patient `POST /offers/:id/decline` returning the entry to `waiting` at the same position with no automatic notification of the next patient, and verify tests for position kept and nobody else notified
+- [x] 5.5 Implement staff `POST /offers/:id/pass` moving the holder back to `waiting` and notifying the next eligible patient behind them, and verify tests for next patient notified, only patient on the waitlist (no new offer), and an accept racing a pass-on (one wins)
+- [x] 5.6 Close the outstanding offer when its holder is removed (patient or staff) and return the slot to staff, and verify tests that nobody else is notified and the slot can be released again
+- [x] 5.7 Write audit records for release, accept, decline, pass-on and closure in the same transaction as each state change, and verify tests assert actor, slot and timestamp, and that a failure mid-transition leaves entry, offer and slot consistent
 
 ## 6. Web UI (visual reference: `docs/waitlist-prototype_V2.html`)
 
