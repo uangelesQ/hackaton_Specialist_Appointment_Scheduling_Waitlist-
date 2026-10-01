@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dr. Elena Ruiz — Cardiology waitlist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1c1e1c; --ink-soft:#585b57; --ink-faint:#8b8d89;
+    --line:#dcdad2; --paper:#faf9f5; --card:#ffffff;
+    --teal-bg:#e1f5ee; --teal-line:#5dcaa5; --teal-text:#085041; --teal-solid:#0f6e56;
+    --coral-bg:#faece7; --coral-line:#f0997b; --coral-text:#712b13; --coral-solid:#d85a30;
+    --slate-bg:#eceef2; --slate-text:#39465c;
+    --gray-bg:#f1efe8;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:40px 24px 80px; background:var(--paper); color:var(--ink); font-family:'Inter',system-ui,sans-serif;}
+  .wrap{max-width:960px; margin:0 auto;}
+
+  header{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; gap:16px; flex-wrap:wrap;}
+  h1{font-family:'Source Serif 4',Georgia,serif; font-weight:600; font-size:26px; margin:0 0 4px; letter-spacing:-0.01em;}
+  .clinic-sub{color:var(--ink-soft); font-size:14px; margin:0;}
+  .reset-btn{
+    font-size:13px; color:var(--ink-soft); background:var(--card); border:1px solid var(--line);
+    border-radius:8px; padding:8px 14px; cursor:pointer; white-space:nowrap;
+  }
+  .reset-btn:hover{border-color:var(--ink-faint);}
+
+  .switcher{
+    display:flex; gap:4px; background:var(--gray-bg); border-radius:10px; padding:4px;
+    width:fit-content; margin-bottom:28px;
+  }
+  .switcher button{
+    border:none; background:none; padding:9px 20px; font-size:14px; font-weight:500;
+    color:var(--ink-soft); border-radius:8px; cursor:pointer; font-family:inherit;
+  }
+  .switcher button.active{background:var(--card); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08);}
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:24px; margin-bottom:16px;}
+  .card h2{margin:0 0 6px; font-size:17px; font-weight:600;}
+  .card p{margin:0; font-size:14px; color:var(--ink-soft); line-height:1.55;}
+
+  .btn{
+    display:inline-flex; align-items:center; gap:6px; border:none; border-radius:8px;
+    padding:10px 18px; font-size:14px; font-weight:500; cursor:pointer; font-family:inherit;
+  }
+  .btn-primary{background:var(--teal-solid); color:#fff;}
+  .btn-primary:hover{background:var(--teal-text);}
+  .btn-secondary{background:var(--card); color:var(--ink); border:1px solid var(--line);}
+  .btn-secondary:hover{border-color:var(--ink-faint);}
+  .btn-decline{background:var(--card); color:var(--coral-text); border:1px solid var(--coral-line);}
+  .btn-small{padding:7px 12px; font-size:13px;}
+  .btn:disabled{opacity:.5; cursor:not-allowed;}
+  .link-btn{background:none; border:none; color:var(--ink-faint); font-size:13px; cursor:pointer; padding:0; font-family:inherit; text-decoration:underline;}
+
+  .banner{
+    display:flex; align-items:center; gap:10px; background:var(--teal-bg); color:var(--teal-text);
+    border-radius:10px; padding:12px 16px; font-size:14px; font-weight:500; margin-bottom:16px;
+  }
+  .bell{width:18px; height:18px; flex:none; margin-right:8px;}
+
+  .slot-card{
+    background:var(--teal-bg); border:1px solid var(--teal-line); border-radius:10px;
+    padding:18px 20px; margin:16px 0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+  }
+  .slot-card .when{font-size:15px; font-weight:600; color:var(--teal-text);}
+  .slot-card .sub{font-size:13px; color:var(--teal-text); opacity:.8;}
+  .slot-actions{display:flex; gap:10px;}
+
+  table{width:100%; border-collapse:collapse; font-size:14px;}
+  th{text-align:left; font-weight:500; color:var(--ink-soft); font-size:12px; padding:0 12px 10px; border-bottom:1px solid var(--line);}
+  td{padding:14px 12px; border-bottom:1px solid var(--line); vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  .pos-cell{font-weight:600; width:36px; color:var(--ink-soft);}
+  .status-pill, .pref-pill{display:inline-block; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:500; white-space:nowrap;}
+  .status-waiting{background:var(--gray-bg); color:var(--ink-soft);}
+  .status-notified{background:var(--teal-bg); color:var(--teal-text);}
+  .status-booked{background:var(--ink); color:#fff;}
+  .pref-inapp{background:var(--slate-bg); color:var(--slate-text);}
+  .pref-telephone, .pref-notrecorded{background:var(--coral-bg); color:var(--coral-text);}
+  .call-flag{font-size:12px; color:var(--coral-text); font-weight:500; margin-top:4px;}
+
+  .control-row{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    background:var(--gray-bg); border-radius:10px; padding:16px 20px; margin-bottom:16px;
+  }
+  .control-text{font-size:14px; color:var(--ink-soft);}
+  .control-text b{color:var(--ink); font-weight:600;}
+  .control-actions{display:flex; gap:8px; flex-wrap:wrap;}
+
+  .add-panel{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:var(--card);
+    border:1px solid var(--line); border-radius:10px; padding:14px 18px; margin-bottom:16px;
+  }
+  .add-panel select{
+    font-family:inherit; font-size:13px; padding:8px 10px; border-radius:7px; border:1px solid var(--line); color:var(--ink);
+  }
+  .add-msg{font-size:13px; margin-top:8px;}
+  .add-msg.ok{color:var(--teal-text);}
+  .add-msg.err{color:var(--coral-text);}
+
+  .empty-state{text-align:center; padding:36px 20px;}
+  .empty-state p{margin-bottom:18px;}
+
+  .confirm{background:var(--teal-bg); border:1px solid var(--teal-line);}
+  .confirm h2{color:var(--teal-text);}
+
+  .meta-row{display:flex; gap:24px; flex-wrap:wrap; margin-top:16px; padding-top:16px; border-top:1px solid var(--line);}
+  .meta-item{flex:1 1 150px; min-width:150px;}
+  .meta-item .k{font-size:11px; color:var(--ink-faint); margin-bottom:4px;}
+  .meta-item .v{font-size:13px; color:var(--ink-soft); line-height:1.4;}
+
+  .stepper{display:flex; align-items:flex-start; margin-bottom:22px;}
+  .step{display:flex; flex-direction:column; align-items:center; flex:1; position:relative;}
+  .step .dot{width:12px; height:12px; border-radius:50%; background:var(--line); z-index:1;}
+  .step.done .dot, .step.current .dot{background:var(--teal-solid);}
+  .step .label{font-size:11px; color:var(--ink-faint); margin-top:8px; text-align:center;}
+  .step.done .label, .step.current .label{color:var(--teal-text); font-weight:500;}
+  .step:not(:last-child)::after{
+    content:''; position:absolute; top:5px; left:calc(50% + 10px); right:calc(-50% + 10px);
+    height:2px; background:var(--line);
+  }
+  .step.done:not(:last-child)::after{background:var(--teal-solid);}
+
+  .footnote{font-size:12px; color:var(--ink-faint); margin-top:24px;}
+
+  .modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:50;}
+  .modal-overlay.show{display:flex;}
+  .modal-box{background:var(--card); border-radius:12px; padding:24px; max-width:380px; width:90%;}
+  .modal-box h3{margin:0 0 8px; font-size:16px; font-weight:600;}
+  .modal-box p{margin:0 0 20px; font-size:14px; color:var(--ink-soft);}
+  .modal-actions{display:flex; justify-content:flex-end; gap:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Dr. Elena Ruiz</h1>
+      <p class="clinic-sub">Cardiology waitlist</p>
+    </div>
+    <button class="reset-btn" onclick="resetDemo()">Reset demo</button>
+  </header>
+
+  <div class="switcher">
+    <button id="tab-patient" class="active" onclick="switchView('patient')">Patient view</button>
+    <button id="tab-staff" onclick="switchView('staff')">Staff view</button>
+  </div>
+
+  <!-- PATIENT VIEW -->
+  <div id="view-patient" class="view active"></div>
+
+  <!-- STAFF VIEW -->
+  <div id="view-staff" class="view">
+    <div id="add-panel"></div>
+    <div id="staff-control"></div>
+    <div class="card" style="padding:0;">
+      <table>
+        <thead>
+          <tr><th style="width:36px;">#</th><th>Patient</th><th>Contact preference</th><th>Status</th></tr>
+        </thead>
+        <tbody id="staff-table-body"></tbody>
+      </table>
+    </div>
+    <p class="footnote">Patient-facing position isn't shown in this iteration (deferred to a future spec) — staff see full position order here; patients just see their own status.</p>
+  </div>
+
+</div>
+
+<!-- Accept confirmation modal -->
+<div id="confirm-modal" class="modal-overlay">
+  <div class="modal-box">
+    <h3>Book this appointment?</h3>
+    <p id="modal-slot-text"></p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeConfirmModal()">Go back</button>
+      <button class="btn btn-primary" onclick="confirmAccept()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- Data model ----
+// status: 'not_joined' | 'waiting' | 'notified' | 'booked'
+// contactPreference: 'in-app' | 'telephone' | 'not-recorded'
+const initialPatients = () => ([
+  { id: 'carlos', name: 'Carlos Mendoza',    status: 'waiting',    contactPreference: 'telephone',    isMe: false },
+  { id: 'ana',    name: 'Ana Torres',        status: 'waiting',    contactPreference: 'not-recorded', isMe: false },
+  { id: 'maria',  name: 'Maria Gómez',       status: 'not_joined', contactPreference: 'in-app',       isMe: true, joinedAt: null },
+]);
+
+let patients = initialPatients();
+let loggedIn = false;
+let declinedForThisSlot = new Set(); // patient ids who declined/passed-on the current outstanding slot cycle
+let lastAddMessage = null;
+
+const SLOT_WHEN = 'Thursday, Oct 2 · 10:30 AM';
+
+function me(){ return patients.find(p => p.isMe); }
+function notifiedPatient(){ return patients.find(p => p.status === 'notified'); }
+
+function eligibleWaiting(){
+  // waiting patients not already declined/passed for the current slot, in join order
+  return patients.filter(p => p.status === 'waiting' && !declinedForThisSlot.has(p.id));
+}
+
+function prefLabel(pref){
+  return pref === 'in-app' ? 'In-app' : pref === 'telephone' ? 'Telephone' : 'Not recorded';
+}
+function prefClass(pref){
+  return pref === 'in-app' ? 'pref-inapp' : pref === 'telephone' ? 'pref-telephone' : 'pref-notrecorded';
+}
+
+function joinWaitlist(){
+  const idx = patients.findIndex(p => p.isMe);
+  const [m] = patients.splice(idx, 1);
+  m.status = 'waiting';
+  m.joinedAt = new Date();
+  patients.push(m); // joins at the back of whoever's already waiting
+  render();
+}
+
+function releaseSlot(){
+  if (notifiedPatient()) return; // BR-007: only one outstanding offer at a time
+  const candidates = eligibleWaiting();
+  if (candidates.length === 0) return;
+  candidates[0].status = 'notified';
+  lastAddMessage = null;
+  render();
+}
+
+function passOn(){
+  const n = notifiedPatient();
+  if (!n) return;
+  const nextList = patients.filter(p => p.id !== n.id && p.status === 'waiting' && !declinedForThisSlot.has(p.id));
+  declinedForThisSlot.add(n.id);
+  n.status = 'waiting';
+  if (nextList.length > 0) nextList[0].status = 'notified';
+  lastAddMessage = null;
+  render();
+}
+
+function recordResponse(patientId, outcome){
+  const p = patients.find(x => x.id === patientId);
+  if (!p || p.status !== 'notified') return;
+  lastAddMessage = null;
+  if (outcome === 'accepted'){
+    p.status = 'booked';
+  } else {
+    declinedForThisSlot.add(p.id);
+    p.status = 'waiting';
+  }
+  render();
+}
+
+function accept(){
+  me().status = 'booked';
+  render();
+}
+function decline(){
+  declinedForThisSlot.add(me().id);
+  me().status = 'waiting';
+  render(); // no auto-reassignment — staff releases the slot again (BR-005)
+}
+function openConfirmModal(){
+  document.getElementById('modal-slot-text').textContent = SLOT_WHEN + ' with Dr. Elena Ruiz. You\'re confirming this slot.';
+  document.getElementById('confirm-modal').classList.add('show');
+}
+function closeConfirmModal(){
+  document.getElementById('confirm-modal').classList.remove('show');
+}
+function confirmAccept(){
+  closeConfirmModal();
+  accept();
+}
+
+function logIn(){ loggedIn = true; render(); }
+function logOut(){ loggedIn = false; render(); }
+
+function addPatient(choice){
+  lastAddMessage = null;
+  if (choice === 'sofia'){
+    lastAddMessage = { type: 'err', text: 'Sofía Reyes is not registered in hospital records. She must register before joining the waitlist.' };
+  } else if (choice === 'jorge'){
+    const existing = patients.find(p => p.id === 'jorge');
+    if (existing){
+      lastAddMessage = { type: 'err', text: 'Jorge Ramírez is already on the waitlist.' };
+    } else {
+      patients.push({ id: 'jorge', name: 'Jorge Ramírez', status: 'waiting', contactPreference: 'telephone', isMe: false });
+      lastAddMessage = { type: 'ok', text: 'Jorge Ramírez added to the waitlist (contact preference: telephone, on file).' };
+    }
+  }
+  render();
+}
+
+function resetDemo(){
+  patients = initialPatients();
+  loggedIn = false;
+  declinedForThisSlot = new Set();
+  lastAddMessage = null;
+  switchView('patient');
+}
+
+function switchView(v){
+  document.getElementById('view-patient').classList.toggle('active', v === 'patient');
+  document.getElementById('view-staff').classList.toggle('active', v === 'staff');
+  document.getElementById('tab-patient').classList.toggle('active', v === 'patient');
+  document.getElementById('tab-staff').classList.toggle('active', v === 'staff');
+  render();
+}
+
+function bellIcon(){
+  return '<svg class="bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>';
+}
+
+function stepFor(status){
+  const map = { waiting: 1, notified: 2, booked: 3 };
+  return map[status] === undefined ? 0 : map[status];
+}
+function renderStepper(status){
+  const current = stepFor(status);
+  const steps = [
+    { key: 0, label: 'Joined' },
+    { key: 1, label: 'Waiting' },
+    { key: 2, label: 'Notified' },
+    { key: 3, label: 'Booked' },
+  ];
+  return `<div class="stepper">${steps.map(s => {
+    const cls = s.key < current ? 'done' : s.key === current ? 'current' : '';
+    return `<div class="step ${cls}"><div class="dot"></div><div class="label">${s.label}</div></div>`;
+  }).join('')}</div>`;
+}
+
+function renderPatient(){
+  const el = document.getElementById('view-patient');
+  const m = me();
+
+  if (!loggedIn){
+    el.innerHTML = `
+      <div class="card empty-state">
+        <h2>Patient Portal</h2>
+        <p>Sign in to see your specialist waitlist and appointment offers.</p>
+        <button class="btn btn-primary" onclick="logIn()">Continue as Maria Gómez</button>
+      </div>`;
+    return;
+  }
+
+  if (m.status === 'not_joined'){
+    el.innerHTML = `
+      <div class="card empty-state">
+        <h2>You're not on the waitlist yet</h2>
+        <p>Join Dr. Ruiz's waitlist and we'll let you know here when a slot opens. No need to call the office.</p>
+        <button class="btn btn-primary" onclick="joinWaitlist()">Join waitlist</button>
+      </div>
+      <p style="text-align:center;"><button class="link-btn" onclick="logOut()">Log out</button></p>`;
+    return;
+  }
+
+  if (m.status === 'waiting'){
+    el.innerHTML = `
+      <div class="card">
+        ${renderStepper(m.status)}
+        <h2>You're on the waitlist</h2>
+        <p>We'll notify you here the moment a slot opens. No need to call to check in.</p>
+        <div class="meta-row">
+          <div class="meta-item"><div class="k">Joined</div><div class="v">${formatDate(m.joinedAt)}</div></div>
+          <div class="meta-item"><div class="k">Notifications</div><div class="v">Check here — no need to call</div></div>
+        </div>
+      </div>
+      <p style="text-align:center;"><button class="link-btn" onclick="logOut()">Log out</button></p>`;
+    return;
+  }
+
+  if (m.status === 'notified'){
+    el.innerHTML = `
+      <div class="banner">${bellIcon()}<span>A slot just opened for you</span></div>
+      <div class="card">
+        ${renderStepper(m.status)}
+        <h2>You're on the waitlist</h2>
+        <div class="slot-card">
+          <div>
+            <div class="when">${SLOT_WHEN}</div>
+            <div class="sub">With Dr. Elena Ruiz</div>
+          </div>
+          <div class="slot-actions">
+            <button class="btn btn-decline" onclick="decline()">Decline</button>
+            <button class="btn btn-primary" onclick="openConfirmModal()">Accept</button>
+          </div>
+        </div>
+        <div class="meta-row">
+          <div class="meta-item"><div class="k">If this offer isn't answered</div><div class="v">Staff can pass it to the next patient</div></div>
+        </div>
+      </div>
+      <p style="text-align:center;"><button class="link-btn" onclick="logOut()">Log out</button></p>`;
+    return;
+  }
+
+  if (m.status === 'booked'){
+    el.innerHTML = `
+      <div class="card confirm">
+        ${renderStepper(m.status)}
+        <h2>You're booked</h2>
+        <p>${SLOT_WHEN} with Dr. Elena Ruiz. See you then — no call needed to confirm.</p>
+        <div class="meta-row">
+          <div class="meta-item"><div class="k">Joined waitlist</div><div class="v">${formatDate(m.joinedAt)}</div></div>
+          <div class="meta-item"><div class="k">Need to change this?</div><div class="v">Contact the office</div></div>
+        </div>
+      </div>
+      <p style="text-align:center;"><button class="link-btn" onclick="logOut()">Log out</button></p>`;
+    return;
+  }
+}
+
+function formatDate(d){
+  if (!d) return '';
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[d.getMonth()] + ' ' + d.getDate();
+}
+
+function renderAddPanel(){
+  const el = document.getElementById('add-panel');
+  const msg = lastAddMessage
+    ? `<div class="add-msg ${lastAddMessage.type === 'ok' ? 'ok' : 'err'}">${lastAddMessage.text}</div>`
+    : '';
+  el.innerHTML = `
+    <div class="add-panel">
+      <span style="font-size:13px; color:var(--ink-soft);">Add a patient on their behalf:</span>
+      <select id="add-select">
+        <option value="jorge">Jorge Ramírez — calling in</option>
+        <option value="sofia">Sofía Reyes — calling in</option>
+      </select>
+      <button class="btn btn-secondary btn-small" onclick="addPatient(document.getElementById('add-select').value)">Add to waitlist</button>
+    </div>
+    <p class="footnote" style="margin-top:6px;">Standing in for a patient lookup in the hospital's existing records system — that lookup already exists elsewhere and isn't built here.</p>
+    ${msg}`;
+}
+
+function renderStaffControl(){
+  const control = document.getElementById('staff-control');
+  const n = notifiedPatient();
+  const waitingCount = eligibleWaiting().length;
+
+  if (n){
+    const isDigital = n.contactPreference === 'in-app';
+    const recordButtons = isDigital ? '' : `
+      <button class="btn btn-primary btn-small" onclick="recordResponse('${n.id}','accepted')">They accepted</button>
+      <button class="btn btn-decline btn-small" onclick="recordResponse('${n.id}','declined')">They declined</button>`;
+    control.innerHTML = `
+      <div class="control-row">
+        <div class="control-text">
+          Waiting on <b>${n.name}</b>'s response${isDigital ? '' : ' — requires a call'}.
+        </div>
+        <div class="control-actions">
+          ${recordButtons}
+          <button class="btn btn-secondary btn-small" onclick="passOn()">Couldn't reach them — pass to next</button>
+        </div>
+      </div>`;
+  } else if (waitingCount > 0) {
+    control.innerHTML = `
+      <div class="control-row">
+        <div class="control-text">No offer outstanding right now.</div>
+        <button class="btn btn-primary" onclick="releaseSlot()">Release next slot</button>
+      </div>`;
+  } else {
+    control.innerHTML = `
+      <div class="control-row">
+        <div class="control-text">No eligible patient remains for this slot.</div>
+      </div>`;
+  }
+}
+
+function renderStaffTable(){
+  const body = document.getElementById('staff-table-body');
+  const joined = patients.filter(p => p.status !== 'not_joined');
+  const active = joined.filter(p => p.status !== 'booked');
+
+  body.innerHTML = joined.map(p => {
+    const pos = p.status === 'booked' ? '—' : (active.findIndex(x => x.id === p.id) + 1);
+    const statusClass = 'status-' + p.status;
+    const statusLabel = p.status === 'waiting' ? 'Waiting' : p.status === 'notified' ? 'Notified' : 'Booked';
+    const callFlag = (p.status === 'notified' && p.contactPreference !== 'in-app')
+      ? '<div class="call-flag">Requires a call</div>' : '';
+    return `<tr>
+      <td class="pos-cell">${pos}</td>
+      <td>${p.name}${p.isMe ? ' <span style="color:var(--ink-faint);font-size:12px;">(you)</span>' : ''}</td>
+      <td><span class="pref-pill ${prefClass(p.contactPreference)}">${prefLabel(p.contactPreference)}</span></td>
+      <td><span class="status-pill ${statusClass}">${statusLabel}</span>${callFlag}</td>
+    </tr>`;
+  }).join('');
+}
+
+function render(){
+  renderPatient();
+  renderAddPanel();
+  renderStaffControl();
+  renderStaffTable();
+}
+
+render();
+</script>
+</body>
+</html>

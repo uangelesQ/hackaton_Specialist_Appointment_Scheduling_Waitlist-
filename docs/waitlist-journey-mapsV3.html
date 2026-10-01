@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Specialist waitlist — patient &amp; staff journeys</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1c1e1c;
+    --ink-soft:#585b57;
+    --line:#dcdad2;
+    --paper:#faf9f5;
+    --card:#ffffff;
+    --teal-bg:#e1f5ee; --teal-line:#5dcaa5; --teal-text:#085041;
+    --coral-bg:#faece7; --coral-line:#f0997b; --coral-text:#712b13;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:48px 24px 80px; background:var(--paper); color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif; line-height:1.5;
+  }
+  .wrap{max-width:1180px; margin:0 auto;}
+  h1{
+    font-family:'Source Serif 4',Georgia,serif; font-weight:600;
+    font-size:34px; margin:0 0 6px; letter-spacing:-0.01em;
+  }
+  .sub{color:var(--ink-soft); font-size:15px; max-width:640px; margin:0 0 32px;}
+
+  .toggle-row{
+    display:flex; align-items:center; gap:14px; margin-bottom:44px;
+    padding:14px 18px; background:var(--card); border:1px solid var(--line);
+    border-radius:10px; width:fit-content;
+  }
+  .toggle-row span{font-size:14px; font-weight:500;}
+  .toggle-row span.off{color:var(--coral-text);}
+  .toggle-row span.on{color:var(--teal-text);}
+  .switch{position:relative; width:46px; height:26px; flex:none;}
+  .switch input{opacity:0; width:100%; height:100%; position:absolute; margin:0; cursor:pointer; z-index:2;}
+  .track{
+    position:absolute; inset:0; background:var(--coral-line); border-radius:13px; transition:background .18s;
+  }
+  .knob{
+    position:absolute; top:3px; left:3px; width:20px; height:20px; background:#fff;
+    border-radius:50%; transition:transform .18s; box-shadow:0 1px 2px rgba(0,0,0,.25);
+  }
+  .switch input:checked ~ .track{background:var(--teal-line);}
+  .switch input:checked ~ .knob{transform:translateX(20px);}
+
+  .lane{margin-bottom:46px;}
+  .lane-label{
+    font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--ink-soft); margin-bottom:14px;
+  }
+  .steps{
+    display:grid; grid-template-columns:repeat(5,1fr); gap:14px; position:relative;
+  }
+  .step{
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:16px; min-height:168px; display:flex; flex-direction:column; gap:8px;
+    position:relative;
+  }
+  .step .n{
+    font-size:12px; font-weight:600; color:var(--ink-soft);
+  }
+  .step h3{margin:0; font-size:15px; font-weight:600;}
+  .step p{margin:0; font-size:13px; color:var(--ink-soft);}
+  .state{display:none;}
+  body.mode-before .step .state.before{display:block;}
+  body.mode-after .step .state.after{display:block;}
+  body.mode-before .step{background:var(--coral-bg); border-color:var(--coral-line);}
+  body.mode-before .step p.state{color:var(--coral-text);}
+  body.mode-after .step{background:var(--teal-bg); border-color:var(--teal-line);}
+  body.mode-after .step p.state{color:var(--teal-text);}
+
+  .connector{
+    grid-column:4 / 5; display:flex; align-items:center; justify-content:center;
+    font-size:11px; color:var(--ink-soft); text-align:center; position:absolute;
+    top:-26px; left:0; right:0;
+  }
+  .bridge{
+    position:relative; height:1px; background:var(--line); margin:0 0 -18px;
+    grid-column:1/-1;
+  }
+
+  .footnote{
+    margin-top:36px; padding:14px 18px; border-left:2px solid var(--line);
+    font-size:13px; color:var(--ink-soft); max-width:760px;
+  }
+
+  @media (max-width:900px){
+    .steps{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body class="mode-after">
+<div class="wrap">
+  <h1>Specialist waitlist — patient &amp; staff journeys</h1>
+  <p class="sub">Same five moments, two actors. Toggle to compare today's phone-based process against the web prototype.</p>
+
+  <div class="toggle-row">
+    <span class="off">Manual process</span>
+    <label class="switch">
+      <input type="checkbox" checked onchange="document.body.className = this.checked ? 'mode-after' : 'mode-before'">
+      <span class="track"></span>
+      <span class="knob"></span>
+    </label>
+    <span class="on">Web prototype</span>
+  </div>
+
+  <div class="lane">
+    <div class="lane-label">Patient</div>
+    <div class="steps">
+      <div class="step">
+        <div class="n">1</div>
+        <h3>Needs an appointment</h3>
+        <p class="state before">Calls the office and learns there are no open slots — told to expect a two-plus week wait.</p>
+        <p class="state after">Requests to join the specialist's waitlist on the site. No call needed.</p>
+      </div>
+      <div class="step">
+        <div class="n">2</div>
+        <h3>On the waitlist</h3>
+        <p class="state before">Has no way to check where they stand. Must call and wait on hold to ask.</p>
+        <p class="state after">Doesn't see a live position in this iteration — that's planned next — but their entry is one accurate shared record, not a note staff might lose.</p>
+      </div>
+      <div class="step">
+        <div class="n">3</div>
+        <h3>Waiting</h3>
+        <p class="state before">Waits with no updates, sometimes calling back just to confirm they're still on the list.</p>
+        <p class="state after">Still waits without a self-check — but staff can find their entry instantly instead of digging through notes.</p>
+      </div>
+      <div class="step">
+        <div class="n">4</div>
+        <h3>Slot opens</h3>
+        <p class="state before">Staff try to reach them by phone. If they miss the call, the slot moves on without them knowing.</p>
+        <p class="state after">If digital: gets a bell notification and banner. If telephone preference: no app notification — staff call them directly.</p>
+      </div>
+      <div class="step">
+        <div class="n">5</div>
+        <h3>Books the appointment</h3>
+        <p class="state before">If reached in time, confirms verbally over the phone.</p>
+        <p class="state after">If digital: taps Accept, confirms, done — no call. If telephone: tells staff on the call, and staff record it for them.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="lane">
+    <div class="lane-label">Staff</div>
+    <div class="steps">
+      <div class="step">
+        <div class="n">1</div>
+        <h3>New request</h3>
+        <p class="state before">Answers the call and writes the patient's info into a notebook or shared sheet.</p>
+        <p class="state after">Patient joins digitally, or staff add them on request — either way, a new entry appears on the dashboard instantly.</p>
+      </div>
+      <div class="step">
+        <div class="n">2</div>
+        <h3>Tracking the list</h3>
+        <p class="state before">Maintains the waitlist by memory, notes, or a sheet that's easy to lose track of.</p>
+        <p class="state after">Sees the full waitlist, in order, with status and contact preference for every patient in one view.</p>
+      </div>
+      <div class="step">
+        <div class="n">3</div>
+        <h3>Slot opens</h3>
+        <p class="state before">Notices a cancellation and has to work out who's next from scattered notes.</p>
+        <p class="state after">The dashboard shows exactly who's next in line. Staff release the slot to them with one click — nothing goes out automatically.</p>
+      </div>
+      <div class="step">
+        <div class="n">4</div>
+        <h3>Notifying the patient</h3>
+        <p class="state before">Calls the next patient on the list, then the one after that if there's no answer.</p>
+        <p class="state after">If digital: the patient's notified in-app automatically. If telephone preference: the row is flagged "requires a call," and staff call them directly.</p>
+      </div>
+      <div class="step">
+        <div class="n">5</div>
+        <h3>Closing it out</h3>
+        <p class="state before">Books the appointment over the phone and manually updates the paper or shared list.</p>
+        <p class="state after">Accepted (by the patient, or recorded by staff after a call) means booked. Declined or unanswered means staff click to pass it to the next patient — never automatic.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    Edge case not shown above: if the waitlist is empty when a patient joins, steps 2–3 happen instantly — they're notified of the open slot right away rather than waiting.
+  </div>
+</div>
+</body>
+</html>

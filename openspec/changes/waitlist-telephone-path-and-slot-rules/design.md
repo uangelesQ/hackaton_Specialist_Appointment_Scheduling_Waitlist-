@@ -10,7 +10,8 @@ The MVP from `waitlist-visibility-notification` is built: Express API with Knex 
 - `release` creates a new slot from the date and time staff enter, or reuses the one `open` slot. Nothing stops a new slot with the same date and time as a `booked` one.
 - `slots.status` already moves to `booked` on accept, and `resolveIfOutstanding` already makes the first action on an offer win (409 `offer_not_available`).
 - Staff view (`waitlistView.ts`) shows name, status, position and join date, plus the outstanding offer and holder, but not a preference, a call flag, or how long the offer has been open.
-- Patient view returns the banner for any holder of the outstanding offer.
+- Patient view returns the banner for any holder of the outstanding offer, and the web app shows the position as "#N", a Leave button, and for staff a Joined column and a Remove button. Prototype V3 shows none of those.
+- The staff add panel is a picker of registered patients who are not yet waiting. The demo seed is Dermatology with five patients and no waiting entries.
 
 See proposal.md for motivation, scope and the decisions taken by assumption.
 
@@ -44,6 +45,14 @@ See proposal.md for motivation, scope and the decisions taken by assumption.
 
 **Views carry the new fields; the shared types are the contract.** `StaffEntryView.contactPreference` (`in_app | telephone | null`), `StaffWaitlistResponse.offer.requiresCall` and `.createdAt`, `MyEntryView.responseChannel` and `.holdsOffer`. The patient banner (`offer`) is returned only for `in_app` holders; other holders get `offer: null`, `holdsOffer: true`. The time outstanding is computed in the web app from `createdAt` so the server stays clock-free.
 
+**Hide, do not delete, the deferred screens.** Position "#N", the patient Leave button, the staff Remove button and the Joined column are removed from the screens only. The endpoints, services, shared types (including `position` in the patient view response) and their API tests stay, so the successor spec can switch them back on. Alternative: delete them end to end; rejected because the Product Owner chose to keep the API, and the deferred specs are already planned. Alternative: leave the screens as built; rejected because prototype V3 and PS v2.4 both defer them. Unused web components and tests for the hidden screens are replaced by tests that the controls are absent.
+
+**Staff recording is one click, as in prototype V3.** "They accepted" and "They declined" act immediately, and "Couldn't reach them — pass to next" is the pass-on. Alternative: reuse the patient's confirm modal for staff; rejected as not in the prototype or the PS, though an accidental booking cannot be undone (see Risks).
+
+**Add-panel messages come from API error codes and the `created` flag.** `patient_not_found` (404) maps to "<name> is not registered in hospital records. They must register before joining the waitlist.", and a join response with `created: false` shows "<name> is already on the waitlist." The picker stays limited to registered patients because the hospital lookup is out of scope, so the unregistered case is reachable through the API and tested there, not by choosing an unregistered name in the UI.
+
+**Demo seed follows the V3 walkthrough.** `seedDatabase` sets the specialist clinic to Cardiology and seeds: Maria Gómez (`in_app`, id 1), Ben Carter (`in_app`, id 2), Chloe Nguyen (`in_app`, id 3), Carlos Mendoza (`telephone`, id 4), Ana Torres (not recorded, id 5) and Jorge Ramírez (`telephone`, id 6). A separate `seedDemoWaitlist` puts Carlos and then Ana on the waitlist, and only the seed CLI calls it, so tests start from an empty waitlist. Sofía Reyes is deliberately not seeded. Alternative: put the waiting entries in `seedDatabase`; rejected because many tests expect an empty waitlist.
+
 **Existing behaviour that already satisfies v2.4 is left alone and covered by regression tests:** unknown patient on staff add (404, nothing created), holder-only access (403), first action wins (409), slot marked `booked` on accept, and the 10-second polling that meets the 60-second visibility target.
 
 ```mermaid
@@ -71,10 +80,10 @@ flowchart TD
     W -- unreachable --> X[Staff pass on]
 ```
 
-**UI, based on `docs/waitlist-prototype_V2.html`.** Patient notified state and the staff view are the reference for layout and styling. The prototype assumes every patient is reachable in-app and has no preference, call-required flag or record-by-phone controls; these are built in its style, pending UX wireframes.
-- Staff table gains a Contact column and a "Call required" pill on the offer holder; the slot control shows how long the offer has been outstanding and, for telephone or not-recorded holders, "Patient accepted by phone" and "Patient declined by phone" actions, each with the existing modal confirm step. In-app holders show only "No response — offer to next patient".
-- Patient view shows the banner only when `offer` is present. When `holdsOffer` is true and there is no banner, it shows a neutral notice that the team will contact them. Wording is pending UX.
-- Accept and decline go through the existing confirm modal for in-app patients; no new step is added.
+**UI, based on `docs/waitlist-prototypeV3.html`.** Screens covered by the prototype: patient login, not-joined, waiting, notified (banner, slot card, accept and decline, confirm modal) and booked, with the four-step stepper; staff add panel, slot control and table. Not covered by the prototype and built in its style: the time an offer has been outstanding (US-004), the error states, the telephone patient's own view (the prototype has no patient view for Carlos or Ana), and polling. Differences where the PS wins: the prototype lists `booked` entries in the staff table (PS: excluded), uses a fixed slot time instead of staff entering one, and has "(you)" and "Reset demo" (not built). The journey map's note that a patient joining an empty waitlist is notified immediately is deferred in PS v2.4 Section 10 and is not built.
+- Staff table columns are #, Patient, Contact preference (pill: In-app, Telephone, Not recorded) and Status (pill plus a "Requires a call" flag on the holder). The slot control reads "Waiting on <name>'s response — requires a call" and shows the time outstanding; telephone and not-recorded holders get "They accepted", "They declined" and "Couldn't reach them — pass to next", in-app holders only the last. With no eligible patient it reads "No eligible patient remains for this slot."
+- Patient view shows the stepper (Joined, Waiting, Notified, Booked), the join date, "We'll notify you here the moment a slot opens. No need to call to check in." while waiting, and for a booked patient the slot and "Contact the office" to change it. The banner appears only when `offer` is present and carries "Staff can pass it to the next patient" if unanswered. When `holdsOffer` is true and there is no banner, a neutral notice says the team will contact them; its wording is pending UX.
+- Accept goes through the existing confirm modal for in-app patients; no new step is added.
 
 ## Risks / Trade-offs
 
@@ -83,6 +92,9 @@ flowchart TD
 - [BR-001, BR-005, BR-012 and the BR-013 wording are *Proposed* in PS-001 v2.4] → Built as written and listed in the proposal; each is a single code path.
 - [The 3G load-time and three-step targets cannot be proven by unit tests] → Verified manually with a throttled browser profile; the 99% within 60 seconds target and WCAG 2.1 AA are not tested because the PS still marks them *Proposed*.
 - [Two changes describe overlapping behaviour while `openspec/specs/` is empty] → New capability names avoid collisions; reconcile at archive.
+- [One-click staff recording cannot be undone, so a mis-click books or releases a slot] → Follows the prototype; the audit record names the staff member, and a confirm step is a small change in `StaffView` if the Product Owner asks for one.
+- [Hidden screens leave dead code in the web app] → Remove the unused components and keep the API; the successor spec re-adds them.
+- [Prototype V3 and the journey map disagree with the PS on `booked` rows and immediate notification on an empty waitlist] → The PS wins, as the project context already states; the differences are listed above.
 - [Date and time as slot identity breaks if a second specialist is added] → Acceptable for the single-specialist scope; revisit with multi-specialty.
 
 ## Migration Plan
