@@ -2,6 +2,7 @@ import type { Knex } from 'knex';
 import { auditRepository } from './audit.js';
 import { entryRepository } from './entries.js';
 import { offerRepository } from './offers.js';
+import { patientRepository } from './patients.js';
 import { slotRepository } from './slots.js';
 import type { Clock } from './types.js';
 
@@ -11,6 +12,7 @@ const systemClock: Clock = () => new Date().toISOString();
 
 export function createRepositories(db: Knex | Knex.Transaction, clock: Clock = systemClock) {
   return {
+    patients: patientRepository(db),
     entries: entryRepository(db, clock),
     slots: slotRepository(db),
     offers: offerRepository(db, clock),

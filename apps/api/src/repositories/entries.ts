@@ -59,6 +59,21 @@ export function entryRepository(db: Knex | Knex.Transaction, clock: Clock) {
     },
 
     /**
+     * 1-based rank of an active entry among active entries, FIFO by join time then id.
+     * Computed from current data on every call, never stored.
+     */
+    async positionOf(entry: Pick<EntryRecord, 'id' | 'joinedAt'>): Promise<number> {
+      const row = await table()
+        .whereIn('status', ACTIVE)
+        .andWhere((q) =>
+          q.where('joined_at', '<', entry.joinedAt).orWhere((tie) => tie.where('joined_at', entry.joinedAt).andWhere('id', '<=', entry.id)),
+        )
+        .count({ n: '*' })
+        .first();
+      return Number(row?.n);
+    },
+
+    /**
      * Moves an entry to `to` only if its current status is one of `from`.
      * Returns false when another action got there first. Closing stamps `closed_at`.
      */

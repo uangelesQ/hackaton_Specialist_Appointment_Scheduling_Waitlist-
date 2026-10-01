@@ -14,11 +14,11 @@
 
 ## 3. Waitlist membership (waitlist-membership)
 
-- [ ] 3.1 Implement patient join `POST /waitlist` creating a `waiting` entry, with the registered-patient check, and verify tests for success, unregistered person and confirmation response
-- [ ] 3.2 Make duplicate join and duplicate staff add return the existing entry and position without creating a row, and verify tests for both paths plus rejoin after `removed` or `booked`
-- [ ] 3.3 Implement staff add-on-behalf `POST /waitlist/patients/:patientId` and verify the entry behaves like a self-joined one
-- [ ] 3.4 Implement patient leave and staff remove (`DELETE /waitlist/:entryId`) with ownership and role checks, and verify tests for patient, staff, other patient (rejected), unauthenticated, and removing an already closed entry (no change, told not active)
-- [ ] 3.5 Write audit records in the same transaction as create and remove with actor type, actor id and timestamp, and verify tests assert attribution for self and staff actions
+- [x] 3.1 Implement patient join `POST /waitlist` creating a `waiting` entry, with the registered-patient check, and verify tests for success, unregistered person and confirmation response
+- [x] 3.2 Make duplicate join and duplicate staff add return the existing entry and position without creating a row, and verify tests for both paths plus rejoin after `removed` or `booked`
+- [x] 3.3 Implement staff add-on-behalf `POST /waitlist/patients/:patientId` and verify the entry behaves like a self-joined one
+- [x] 3.4 Implement patient leave and staff remove (`DELETE /waitlist/:entryId`) with ownership and role checks, and verify tests for patient, staff, other patient (rejected), unauthenticated, and removing an already closed entry (no change, told not active)
+- [x] 3.5 Write audit records in the same transaction as create and remove with actor type, actor id and timestamp, and verify tests assert attribution for self and staff actions
 
 ## 4. Waitlist visibility (waitlist-visibility)
 
