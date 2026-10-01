@@ -1,0 +1,37 @@
+{
+  "specialist": "Dr. Elena Ruiz",
+  "profiles": {
+    "current": {
+      "inApp1": { "name": "Ana Torres", "role": "patient" },
+      "inApp2": { "name": "Ben Carter", "role": "patient" },
+      "inApp3": { "name": "Chloe Nguyen", "role": "patient" },
+      "telephone1": { "name": "David Okafor", "role": "patient" },
+      "telephone2": { "name": "Jorge Ramírez", "role": "patient" },
+      "notRecorded1": { "name": "Eva Lindqvist", "role": "patient" },
+      "staff1": { "name": "Sam Patel", "role": "staff" },
+      "staff2": { "name": "Maria Gomez", "role": "staff" }
+    },
+    "v3": {
+      "inApp1": { "name": "Maria Gómez", "role": "patient" },
+      "inApp2": { "name": "Ben Carter", "role": "patient" },
+      "inApp3": { "name": "Chloe Nguyen", "role": "patient" },
+      "telephone1": { "name": "Carlos Mendoza", "role": "patient" },
+      "telephone2": { "name": "Jorge Ramírez", "role": "patient" },
+      "notRecorded1": { "name": "Ana Torres", "role": "patient" },
+      "staff1": { "name": "Sam Patel", "role": "staff" },
+      "staff2": { "name": "Maria Gomez", "role": "staff" }
+    }
+  },
+  "unregisteredPatientId": 99999,
+  "labels": {
+    "releaseSlot": "Release slot",
+    "passOn": "No response — offer to next patient",
+    "recordAccepted": "They accepted",
+    "recordDeclined": "They declined",
+    "emptyWaitlist": "No patients are currently waiting.",
+    "returnedSlot": "A returned slot is ready to release",
+    "bannerText": "A slot just opened for you",
+    "offerNoLongerAvailable": "This offer is no longer available.",
+    "requiresCall": "Requires a call"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "playwright-suite",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright automation for the Specialist Waitlist QA test spec",
+  "scripts": {
+    "test": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:open": "allure open allure-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^24.0.0",
+    "allure-commandline": "^2.46.1",
+    "allure-js-commons": "^3.13.0",
+    "allure-playwright": "^3.13.0",
+    "dotenv": "^18.0.5",
+    "typescript": "^5.6.0"
+  }
+}
