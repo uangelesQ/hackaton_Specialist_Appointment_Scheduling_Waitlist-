@@ -19,7 +19,8 @@ Do NOT generate Playwright or other automation code. Do not invent behaviour: if
 2. Find the OpenSpec change: run `openspec list --json`. If exactly one change exists use it, otherwise ask. Read its `proposal.md`, `specs/**/spec.md` and `design.md`.
 3. If the PS mentions a prototype or UI reference, read it for labels and screen text to use in expected results.
 4. If `docs/qa/test-spec-<change>.md` already exists, go to **Re-run mode** below.
-5. Precedence when sources disagree: the PS is authoritative, then the OpenSpec specs, then the design, then the prototype. Record every disagreement as a gap (see step 2).
+5. Check the implementation state, read-only: count the checked and unchecked tasks in the change's `tasks.md`, and note which behaviour the test cases will rely on that is not built yet. The application is not hosted; it runs locally. Do not start it or install anything from this skill. If the user wants the cases run or automated, point them to `playwright-suite/references/app-readiness.md` (skill `playwright-suite-design`), which checks that the app is initialized and running.
+6. Precedence when sources disagree: the PS is authoritative, then the OpenSpec specs, then the design, then the prototype. Record every disagreement as a gap (see step 2).
 
 ### 2. Analysis (show this before writing test cases)
 
@@ -58,7 +59,7 @@ Do not pad. Skip a technique if the spec gives nothing to test with it. Do not w
 
 Write the file with these sections:
 
-1. **Header:** feature, change name, PS file and version, technical spec source, date, status `Draft`.
+1. **Header:** feature, change name, PS file and version, technical spec source, implementation status (tasks done of total, and what is not built yet), date, status `Draft`.
 2. **Scope and approach:** what is covered, what is out of scope (quote the PS), techniques used.
 3. **Gap and ambiguity log:** from the analysis.
 4. **Test data conventions:** named actors and base data shared across cases (take them from the prototype or seed data where they exist, for example the prototype's patients and specialist). Each case still sets up its own state.
