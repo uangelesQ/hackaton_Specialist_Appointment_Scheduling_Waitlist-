@@ -16,7 +16,7 @@ export interface TestApp {
 }
 
 /** An app over a fresh seeded in-memory database. Each clock call is one minute later. */
-export async function buildTestApp(): Promise<TestApp> {
+export async function buildTestApp(options: { demoLogin?: boolean } = {}): Promise<TestApp> {
   let tick = 0;
   const clock = () => new Date(Date.UTC(2026, 9, 1, 9, tick++)).toISOString();
 
@@ -25,7 +25,7 @@ export async function buildTestApp(): Promise<TestApp> {
   await seedDatabase(db);
 
   return {
-    app: createApp({ db, jwtSecret: TEST_SECRET, clock }),
+    app: createApp({ db, jwtSecret: TEST_SECRET, clock, demoLogin: options.demoLogin ?? true }),
     db,
     patient: (id) => signToken({ role: 'patient', id }, TEST_SECRET),
     staff: (id) => signToken({ role: 'staff', id }, TEST_SECRET),

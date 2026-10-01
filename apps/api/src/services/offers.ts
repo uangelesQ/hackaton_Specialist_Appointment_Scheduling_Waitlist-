@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import type { EntryStatus } from '@waitlist/shared';
+import type { EntryStatus, OfferView } from '@waitlist/shared';
 import { isUniqueViolation } from '../db/errors.js';
 import { HttpError } from '../http/errors.js';
 import {
@@ -11,13 +11,6 @@ import {
   type SlotRecord,
 } from '../repositories/index.js';
 import type { Actor } from './waitlist.js';
-
-export interface OfferView {
-  id: number;
-  slotId: number;
-  slotStartsAt: string;
-  entryId: number;
-}
 
 const toOfferView = (offer: OfferRecord, slot: SlotRecord): OfferView => ({
   id: offer.id,

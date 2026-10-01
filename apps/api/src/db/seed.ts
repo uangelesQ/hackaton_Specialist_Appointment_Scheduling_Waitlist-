@@ -1,7 +1,7 @@
 import type { Knex } from 'knex';
 
 // Fictional demo data. Fixed ids make the seed safe to run more than once.
-const SPECIALIST = { id: 1, name: 'Dr. Elena Ruiz', clinic: 'Cardiology Clinic' };
+const SPECIALIST = { id: 1, name: 'Dr. Elena Ruiz', clinic: 'Dermatology' };
 
 const PATIENTS = [
   { id: 1, full_name: 'Ana Torres' },

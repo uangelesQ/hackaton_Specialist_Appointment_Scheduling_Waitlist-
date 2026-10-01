@@ -1,54 +1,14 @@
 import type { Knex } from 'knex';
-import type { EntryStatus } from '@waitlist/shared';
+import type { MyWaitlistResponse, OfferBanner, ReleaseState, StaffWaitlistResponse } from '@waitlist/shared';
 import { withTransaction, type Clock } from '../repositories/index.js';
 import { nextEligibleEntry } from './offers.js';
 import { assignPositions } from './position.js';
-
-export interface OfferBanner {
-  id: number;
-  slotStartsAt: string;
-  specialistName: string;
-}
-
-export interface MyEntryView {
-  id: number;
-  status: EntryStatus;
-  position: number;
-  joinedAt: string;
-  offer: OfferBanner | null;
-}
-
-export interface StaffEntryView {
-  id: number;
-  patientId: number;
-  patientName: string;
-  status: EntryStatus;
-  position: number;
-  joinedAt: string;
-  holdsOffer: boolean;
-}
-
-export type ReleaseBlockReason = 'offer_outstanding' | 'no_waiting_patients' | 'all_waiting_declined';
-
-/** Whether staff can release a slot now. When not, `reason` says why and no release action should be shown. */
-export interface ReleaseState {
-  available: boolean;
-  reason: ReleaseBlockReason | null;
-  /** Date and time of a returned slot that will be reused; null when staff must enter one. */
-  openSlotStartsAt: string | null;
-}
-
-export interface StaffWaitlistView {
-  entries: StaffEntryView[];
-  offer: { id: number; entryId: number; slotStartsAt: string } | null;
-  release: ReleaseState;
-}
 
 /** Read-only views. Every call reads current data in one transaction, so nothing here can go stale. */
 export function waitlistViewService(db: Knex, clock?: Clock) {
   return {
     /** The patient's own active entry, or null. The position is a bare number: no total is ever returned. */
-    async forPatient(patientId: number): Promise<{ entry: MyEntryView | null }> {
+    async forPatient(patientId: number): Promise<MyWaitlistResponse> {
       return withTransaction(
         db,
         async (repos) => {
@@ -78,7 +38,7 @@ export function waitlistViewService(db: Knex, clock?: Clock) {
     },
 
     /** Every active entry in position order, plus the outstanding offer and who holds it. */
-    async forStaff(): Promise<StaffWaitlistView> {
+    async forStaff(): Promise<StaffWaitlistResponse> {
       return withTransaction(
         db,
         async (repos) => {

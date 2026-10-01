@@ -11,6 +11,9 @@
 - [x] 2.1 Create migrations for `waitlist_entries` (partial unique index on active patient), `slots`, `slot_offers` (partial unique index on outstanding) and `audit_log`, and verify tests that a duplicate active entry and a second outstanding offer both fail at the database level
 - [x] 2.2 Implement token auth middleware with `patient` and `staff` roles and verify tests for missing token (401), wrong role (403) and patient scoping to own entry
 - [x] 2.3 Implement repository layer for entries, slots, offers and audit with transaction support, and verify repository tests pass
+- [x] 2.4 Added during apply: demo-only `POST /demo/login` and `GET /demo/users` (seeded users, no password, mounted only when `DEMO_LOGIN=true`) so 6.2 has a way to sign in, and verify tests for patient and staff sign-in, unknown user, bad request and disabled
+- [x] 2.5 Added during apply: staff-only `GET /patients` listing registered patients and whether each is on the waitlist, so 6.5 can pick a patient to add, and verify tests for staff, patient-denied and unauthenticated
+- [x] 2.6 Added during apply: `apps/api/src/server.ts` with `npm run dev` so the web app has an API to talk to, and verify the server starts and answers `GET /demo/users`
 
 ## 3. Waitlist membership (waitlist-membership)
 
@@ -38,12 +41,12 @@
 
 ## 6. Web UI (visual reference: `docs/waitlist-prototype_V2.html`)
 
-- [ ] 6.1 Set up shared styles and components (cards, position badge, meta row, stepper, banner, slot card, modal, table, buttons) matching the prototype's colours and type, and verify a rendered component test for each
-- [ ] 6.2 Build login and role-based routing for patient and staff and verify component tests for each role's landing view
-- [ ] 6.3 Build patient waitlist view: join, position as "#N" with the "Your place in line" label and join date, no total, leave, the not-on-waitlist empty state, and duplicate-join showing the existing position, and verify component tests with mocked API for each
-- [ ] 6.4 Build the patient offer banner with slot card, Accept opening the confirmation modal (slot date, time and specialist, Confirm or Cancel) and Decline, plus the booked confirmation, and verify component tests that Cancel makes no API call, Confirm books, Decline keeps the position, and the banner shows only for the offer holder
-- [ ] 6.5 Build staff waitlist table (position, patient, status, join date) with closed entries excluded, the empty state without a release action, add patient and remove entry, and verify component tests for each action and positions updating after removal
-- [ ] 6.6 Build staff slot release (date and time input, hidden while an offer is outstanding or nobody is waiting) and pass-on control showing the offer holder, and verify component tests for each visibility state and for both actions
+- [x] 6.1 Set up shared styles and components (cards, position badge, meta row, stepper, banner, slot card, modal, table, buttons) matching the prototype's colours and type, and verify a rendered component test for each
+- [x] 6.2 Build login and role-based routing for patient and staff and verify component tests for each role's landing view
+- [x] 6.3 Build patient waitlist view: join, position as "#N" with the "Your place in line" label and join date, no total, leave, the not-on-waitlist empty state, and duplicate-join showing the existing position, and verify component tests with mocked API for each
+- [x] 6.4 Build the patient offer banner with slot card, Accept opening the confirmation modal (slot date, time and specialist, Confirm or Cancel) and Decline, plus the booked confirmation, and verify component tests that Cancel makes no API call, Confirm books, Decline keeps the position, and the banner shows only for the offer holder
+- [x] 6.5 Build staff waitlist table (position, patient, status, join date) with closed entries excluded, the empty state without a release action, add patient and remove entry, and verify component tests for each action and positions updating after removal
+- [x] 6.6 Build staff slot release (date and time input, hidden while an offer is outstanding or nobody is waiting) and pass-on control showing the offer holder, and verify component tests for each visibility state and for both actions
 
 ## 7. Integration and documentation
 

@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import type { EntryStatus } from '@waitlist/shared';
+import type { EntryStatus, EntryView, JoinResponse } from '@waitlist/shared';
 import { isUniqueViolation } from '../db/errors.js';
 import { HttpError } from '../http/errors.js';
 import { createRepositories, withTransaction, type ActorType, type Clock, type EntryRecord, type Repositories } from '../repositories/index.js';
@@ -7,20 +7,6 @@ import { createRepositories, withTransaction, type ActorType, type Clock, type E
 export interface Actor {
   type: ActorType;
   id: number;
-}
-
-export interface EntryView {
-  id: number;
-  patientId: number;
-  status: EntryStatus;
-  position: number;
-  joinedAt: string;
-}
-
-export interface JoinResult {
-  entry: EntryView;
-  /** False when the patient was already on the waitlist and nothing was created. */
-  created: boolean;
 }
 
 async function toView(repos: Repositories, entry: EntryRecord): Promise<EntryView> {
@@ -34,7 +20,7 @@ async function toView(repos: Repositories, entry: EntryRecord): Promise<EntryVie
 }
 
 export function waitlistService(db: Knex, clock?: Clock) {
-  async function viewExisting(patientId: number): Promise<JoinResult | undefined> {
+  async function viewExisting(patientId: number): Promise<JoinResponse | undefined> {
     const repos = createRepositories(db, clock);
     const existing = await repos.entries.findActiveByPatient(patientId);
     return existing && { entry: await toView(repos, existing), created: false };
@@ -45,7 +31,7 @@ export function waitlistService(db: Knex, clock?: Clock) {
      * Adds a patient to the waitlist, on their own behalf or on staff's. A patient who is
      * already on the list gets their existing entry back and nothing is created or audited.
      */
-    async join(patientId: number, actor: Actor): Promise<JoinResult> {
+    async join(patientId: number, actor: Actor): Promise<JoinResponse> {
       try {
         return await withTransaction(
           db,

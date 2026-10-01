@@ -45,6 +45,8 @@ Greenfield: the repo has no application code. Stack is TypeScript, Node (API) an
 
 **Audit log written in the same transaction as each action**, recording actor type and id plus timestamp. Logs and errors must not include patient names or other personal data; this is the baseline while the compliance framework is open.
 
+**Demo login and patient lookup (added during apply).** The design says "seeded users" but no task created a way to sign in, and staff "add patient" needs a list to pick from. `POST /demo/login` and `GET /demo/users` sign in as any seeded patient or staff member with no password and exist only when `DEMO_LOGIN=true`; a real identity provider replaces that router and nothing else. `GET /patients` (staff only) lists registered patients with an `onWaitlist` flag. `apps/api/src/server.ts` starts the API; without `DEMO_LOGIN=true` it requires `JWT_SECRET`. API response types live in `@waitlist/shared`, so the API and web share one contract.
+
 **React UI:** `docs/waitlist-prototype_V2.html` is the visual reference for layout and styling (cards, position badge, meta row, stepper, notification banner, slot card, confirmation modal, staff table, buttons, colours and type).
 - Patient views: join, position as "#N" with the join date and the "Your place in line" label, leave, the offer banner with slot card, Accept (opens the confirmation modal) and Decline, and the booked confirmation.
 - Staff views: waitlist table (position, patient, status, join date), add patient, remove entry, slot release (date and time input), and pass-on of the outstanding offer with the holder shown.

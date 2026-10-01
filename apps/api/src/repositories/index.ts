@@ -5,6 +5,7 @@ import { offerRepository } from './offers.js';
 import { patientRepository } from './patients.js';
 import { slotRepository } from './slots.js';
 import { specialistRepository } from './specialist.js';
+import { staffRepository } from './staff.js';
 import type { Clock } from './types.js';
 
 export type * from './types.js';
@@ -15,6 +16,7 @@ export function createRepositories(db: Knex | Knex.Transaction, clock: Clock = s
   return {
     patients: patientRepository(db),
     specialist: specialistRepository(db),
+    staff: staffRepository(db),
     entries: entryRepository(db, clock),
     slots: slotRepository(db),
     offers: offerRepository(db, clock),
