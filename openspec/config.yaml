@@ -4,13 +4,14 @@ schema: spec-driven
 strict_tdd: true
 
 context: |
-  Product: Specialist Appointment Scheduling & Waitlist. Current feature: Waitlist Visibility & Slot Availability Notification (PS-001 v0.2, MVP).
-  Sources: docs/PS-001-Waitlist-Visibility-NotificationV2.md (stories US-001..US-007, BR-001..BR-004), docs/PRD-specialist-appointment-waitlist.md, docs/prototype-walkthrough_V2.md.
-  UI visual reference: docs/waitlist-prototype_V2.html (layout, colours, type). It has no leave/add/remove controls, specialist selector or login; build those in the same style.
-  Tech stack: TypeScript (strict), monorepo apps/api + apps/web + packages/shared. API: Node, Express, Zod, SQLite behind a repository layer, JWT auth with roles patient|staff. Web: React, Vite, React Query. Tests: Vitest, Supertest.
-  Out of scope (deferred to "Slot Claim & Booking Confirmation"): claiming or booking a slot, Accept/Decline, response windows, cascading offers, email/SMS. Do not build or infer them.
-  Decisions taken by assumption, pending Product Owner confirmation: FIFO ordering by join time; in-app notification only behind a channel interface; one active entry per patient per specialist; compliance framework still open.
-  Conventions: position is computed on read, never stored. No PII (names, patient identifiers) in logs or error messages. Every entry create/remove is audited in the same transaction. Code, comments and UI copy in English. Conventional commits.
+  Product: Specialist Appointment Scheduling & Waitlist. Current feature: Waitlist Visibility & Slot Offers (PS-001 v0.4, MVP). Patients join a single specialist's waitlist and see their place as "#N" (never a total). Staff release an open slot; the first eligible patient is notified with an in-app banner and can accept (after a confirm step) or decline. Staff manage the list, release slots and pass unanswered offers on.
+  Sources: docs/PS-001-Waitlist-Visibility-NotificationV3.md (stories US-001..US-010, rules BR-001..BR-009), docs/PRD-specialist-appointment-waitlist.md, docs/prototype-walkthrough_V2.md.
+  UI visual reference: docs/waitlist-prototype_V2.html (layout, colours, type). It has no leave/add/remove controls or login; those are built in the same style. Where the prototype and the PS differ the PS wins: declining does not cascade to the next patient, closed (booked/removed) entries are not shown in the staff table, and the prototype's "Reset demo" and fixed slot time are not built.
+  Tech stack: TypeScript (strict), Node 24, monorepo apps/api + apps/web + packages/shared (response types shared by both sides). API: Express, Zod, SQLite via Knex and better-sqlite3 behind a repository layer, JWT auth with roles patient|staff. Web: React, Vite, React Query. Tests: Vitest, Supertest, Testing Library.
+  Scope: one specialist in one clinic. Out of scope: automatic timer or cascade, self-service slot browsing, staff-confirmed booking, email/SMS or any out-of-app channel, a notification centre, handling of cancellations, multi-specialist support.
+  Decisions taken by assumption, pending Product Owner confirmation: staff enter the slot date and time when they release a new slot; a returned slot (declined, passed on with nobody behind, or holder removed) stays open and is reused with the same date and time; if every waiting patient declined it no release action is offered; after a pass-on the next patient is the next waiting patient behind the holder who has not declined that slot; compliance framework still open.
+  Sign-in is a demo stand-in (passwordless, only when DEMO_LOGIN=true) for a real identity provider; never enable it anywhere real.
+  Conventions: entry status is waiting|notified|booked|removed; position is computed on read, never stored; at most one outstanding offer (unique index); every state change runs in one transaction with its audit record; no PII (names, patient identifiers) in logs or error messages; code, comments and UI copy in English; conventional commits.
 
 rules:
   proposal:
@@ -35,9 +36,10 @@ operations:
       - Work one numbered task group at a time and stop after each group for review
       - Write the test first where a test runner exists; run the task's verification before ticking its checkbox
       - Reuse existing helpers and shared types before adding new ones
-      - Never implement Accept/Decline, booking, or cascading offers, even though the prototype shows them
+      - Do not build what the product spec defers (an automatic timer or cascade to the next patient, staff-confirmed booking, email/SMS, or a notification centre)
       - Keep PII out of logs and error messages
       - Stop and ask if a task needs behaviour the specs or design do not describe
+      - Before calling a task group done, run npm run build, npm run lint and npm test and report any failure
   archive:
     guidance:
       - Summarize which specs were merged into openspec/specs and any assumptions still awaiting Product Owner confirmation

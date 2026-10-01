@@ -50,5 +50,5 @@
 
 ## 7. Integration and documentation
 
-- [ ] 7.1 Add an end-to-end integration test: patient joins, staff views, staff release a slot, patient sees the banner, declines and keeps their position, staff release again and the next patient accepts and confirms, the booked entry leaves the list; verify it passes in CI
-- [ ] 7.2 Write the README with setup, seeded users, the staff release flow, and the plan's assumptions awaiting Product Owner confirmation, and verify the documented setup commands run as written
+- [x] 7.1 Add an end-to-end integration test: patient joins, staff views, staff release a slot, patient sees the banner, declines and keeps their position, staff release again and the next patient accepts and confirms, the booked entry leaves the list; verify it passes in CI (no CI pipeline exists in the repo yet; verified instead from a clean copy with `npm ci`, build, lint and test, including 96 overlapping test runs)
+- [x] 7.2 Write the README with setup, seeded users, the staff release flow, and the plan's assumptions awaiting Product Owner confirmation, and verify the documented setup commands run as written

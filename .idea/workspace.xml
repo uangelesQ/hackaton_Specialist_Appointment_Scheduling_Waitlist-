@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="c172785e-cc69-4959-ace7-1b794f5b6e17" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/apps/web/public/els-logo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/auth/auth.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/auth/auth.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/routes/demo.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/routes/demo.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/routes/offers.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/routes/offers.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/routes/waitlist.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/routes/waitlist.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/routes/waitlistView.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/routes/waitlistView.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/test/testApp.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/test/testApp.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/tsconfig.tsbuildinfo" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/vitest.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/vitest.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/waitlist-visibility-notification/tasks.md" beforeDir="false" afterPath="$PROJECT_DIR$/openspec/changes/waitlist-visibility-notification/tasks.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/openspec/config.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/shared/tsconfig.tsbuildinfo" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 5,
+  "fromUser": false
+}]]></component>
+  <component name="ProjectId" id="3K41EhGuNHshoTd2NaRysdr4tue" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/abarcaj/Desktop/Hackaton/hackaton_Specialist_Appointment_Scheduling_Waitlist-/apps/web/public",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "/Users/abarcaj/Desktop/Hackaton/hackaton_Specialist_Appointment_Scheduling_Waitlist-/node_modules/typescript/lib"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/apps/web/public" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-a203e0a19954-intellij.indexing.shared.core-IU-262.10315.125" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.10315.125" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c172785e-cc69-4959-ace7-1b794f5b6e17" name="Changes" comment="" />
+      <created>1790801916731</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1790801916731</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

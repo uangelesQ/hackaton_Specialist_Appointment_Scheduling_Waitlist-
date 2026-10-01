@@ -12,7 +12,7 @@ describe('slot offers', () => {
   });
 
   afterEach(async () => {
-    await t.db.destroy();
+    await t.close();
   });
 
   // --- helpers -------------------------------------------------------------

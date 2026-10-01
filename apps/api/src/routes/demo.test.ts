@@ -6,7 +6,7 @@ describe('demo login and patient lookup', () => {
   let t: TestApp;
 
   afterEach(async () => {
-    await t.db.destroy();
+    await t.close();
   });
 
   describe('demo login (2.4)', () => {

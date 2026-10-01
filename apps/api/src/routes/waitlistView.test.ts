@@ -10,7 +10,7 @@ describe('waitlist visibility', () => {
   });
 
   afterEach(async () => {
-    await t.db.destroy();
+    await t.close();
   });
 
   const join = (patientId: number) =>
