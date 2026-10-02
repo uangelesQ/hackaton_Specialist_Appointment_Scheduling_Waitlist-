@@ -1,6 +1,7 @@
 import { type APIRequestContext } from '@playwright/test'
 import { apiUrl } from './env'
 import { actor, type Actor, type ActorAlias } from './actors'
+import { addLegacyWaitingEntry } from './e2eDb'
 
 export interface ApiResult<T = any> {
   status: number
@@ -96,10 +97,22 @@ export class ApiHelper {
     return this.send('delete', `/waitlist/${entryId}`, staffToken)
   }
 
-  /** Staff add the actors in order, so the first one is position 1. */
+  /**
+   * The actors join in order, so the first one is position 1. Staff add each one through the API, except an
+   * actor with no recorded preference: the API refuses to create an entry for them (PS-001 v2.5, BR-014), so
+   * they are put on the waitlist as a patient who was already waiting before a choice was required (BR-019).
+   */
   async seedWaiting(aliases: ActorAlias[]): Promise<void> {
     const staffToken = await this.tokenFor('staff1')
-    for (const alias of aliases) await this.addPatient(staffToken, alias)
+    const staffId = await this.idOf(actor('staff1'))
+    const patients: { name: string; contactPreference: string | null }[] = (await this.send('get', '/patients', staffToken)).body.patients
+
+    for (const alias of aliases) {
+      const who = actor(alias)
+      const known = patients.find((patient) => patient.name === who.name)
+      if (known && known.contactPreference === null) addLegacyWaitingEntry(who.name, staffId)
+      else await this.addPatient(staffToken, alias)
+    }
   }
 
   /** Leaves no outstanding offer and no active entry, and uses up a returned slot if one is left. */
@@ -119,6 +132,8 @@ export class ApiHelper {
     const patients: { id: number; name: string }[] = (await this.send('get', '/patients', staffToken)).body.patients
     for (const patient of patients) {
       const added = await this.send('post', `/waitlist/patients/${patient.id}`, staffToken)
+      // A patient with no recorded preference cannot be added, and so cannot take the slot.
+      if (added.status >= 400) continue
       const released = await this.release(staffToken)
       if (released.status === 201) {
         const login = await this.send('post', '/demo/login', undefined, { role: 'patient', id: patient.id })
