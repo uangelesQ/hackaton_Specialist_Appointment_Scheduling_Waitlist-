@@ -1,11 +1,14 @@
 import { Router } from 'express';
 import type { Knex } from 'knex';
 import { z } from 'zod';
+import { CONTACT_PREFERENCES } from '@waitlist/shared';
 import { requireEntryAccess, requireRole } from '../auth/auth.js';
 import { createRepositories, type Clock } from '../repositories/index.js';
 import { waitlistService, type Actor } from '../services/waitlist.js';
 
 const idParam = z.coerce.number().int().positive();
+/** Staff may record the preference of a caller who has none. A patient joining sends no body. */
+const addBody = z.object({ contactPreference: z.enum(CONTACT_PREFERENCES).optional() });
 
 function actorOf(auth: { role: Actor['type']; id: number } | undefined): Actor {
   // Routes below are behind `authenticate`, so `auth` is always set.
@@ -25,7 +28,8 @@ export function waitlistRouter(db: Knex, clock?: Clock): Router {
 
   router.post('/waitlist/patients/:patientId', requireRole('staff'), async (req, res) => {
     const patientId = idParam.parse(req.params.patientId);
-    const result = await service.join(patientId, actorOf(req.auth));
+    const { contactPreference } = addBody.parse(req.body ?? {});
+    const result = await service.join(patientId, actorOf(req.auth), contactPreference);
     res.status(result.created ? 201 : 200).json(result);
   });
 

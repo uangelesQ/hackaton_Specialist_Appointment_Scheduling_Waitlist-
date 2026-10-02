@@ -22,7 +22,9 @@ describe('telephone path: responding to an offer', () => {
   const asPatient = (id: number) => t.bearer(t.patient(id));
   const asStaff = (id = 1) => t.bearer(t.staff(id));
 
+  // Patient 5 has no recorded preference, so they can only be waiting as a legacy entry (BR-019).
   async function join(patientId: number): Promise<number> {
+    if (patientId === 5) return t.addLegacyEntry(patientId);
     const res = await request(t.app).post('/waitlist').set('Authorization', asPatient(patientId));
     return res.body.entry.id;
   }

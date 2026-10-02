@@ -5,7 +5,7 @@ import { signToken } from '../auth/auth.js';
 import { createDb } from '../db/connection.js';
 import { migrateLatest } from '../db/migrate.js';
 import { seedDatabase } from '../db/seed.js';
-import type { Clock } from '../repositories/index.js';
+import { createRepositories, type Clock } from '../repositories/index.js';
 import { close, listen } from './server.js';
 
 export const TEST_SECRET = 'test-secret';
@@ -19,6 +19,12 @@ export interface TestApp {
   bearer: (token: string) => string;
   /** The app's clock, so anything seeded directly shares its timeline and FIFO order stays meaningful. */
   clock: Clock;
+  /**
+   * Puts a patient on the waitlist the way the demo seed does, bypassing the preference gate. This is how a
+   * patient with no recorded preference can be waiting: they joined before a choice was required (BR-019).
+   * Returns the entry id.
+   */
+  addLegacyEntry: (patientId: number) => Promise<number>;
   /** Stops the server and closes the database. Call from `afterEach`. */
   close: () => Promise<void>;
 }
@@ -41,6 +47,12 @@ export async function buildTestApp(options: { demoLogin?: boolean } = {}): Promi
     staff: (id) => signToken({ role: 'staff', id }, TEST_SECRET),
     bearer: (token) => `Bearer ${token}`,
     clock,
+    addLegacyEntry: async (patientId) => {
+      const repos = createRepositories(db, clock);
+      const entry = await repos.entries.create({ patientId, createdByType: 'staff', createdById: 1 });
+      await repos.audit.record({ action: 'entry_created', entryId: entry.id, actorType: 'staff', actorId: 1 });
+      return entry.id;
+    },
     close: async () => {
       await close(server);
       await db.destroy();

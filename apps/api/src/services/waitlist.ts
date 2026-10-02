@@ -1,8 +1,9 @@
 import type { Knex } from 'knex';
-import type { EntryStatus, EntryView, JoinResponse } from '@waitlist/shared';
+import type { ContactPreference, EntryStatus, EntryView, JoinResponse } from '@waitlist/shared';
 import { isUniqueViolation } from '../db/errors.js';
 import { HttpError } from '../http/errors.js';
 import { createRepositories, withTransaction, type ActorType, type Clock, type EntryRecord, type Repositories } from '../repositories/index.js';
+import { preferenceService } from './preference.js';
 
 export interface Actor {
   type: ActorType;
@@ -20,6 +21,7 @@ async function toView(repos: Repositories, entry: EntryRecord): Promise<EntryVie
 }
 
 export function waitlistService(db: Knex, clock?: Clock) {
+  const preferences = preferenceService(db, clock);
   async function viewExisting(patientId: number): Promise<JoinResponse | undefined> {
     const repos = createRepositories(db, clock);
     const existing = await repos.entries.findActiveByPatient(patientId);
@@ -29,9 +31,13 @@ export function waitlistService(db: Knex, clock?: Clock) {
   return {
     /**
      * Adds a patient to the waitlist, on their own behalf or on staff's. A patient who is
-     * already on the list gets their existing entry back and nothing is created or audited.
+     * already on the list gets their existing entry back and nothing is created, recorded or audited.
+     *
+     * A patient with no recorded preference needs one before an entry is created (BR-014). Staff may
+     * supply it when adding a caller who has none, and it is saved with the entry or not at all (BR-016);
+     * a patient chooses beforehand through `preferenceService`, so it survives a failed join (US-012).
      */
-    async join(patientId: number, actor: Actor): Promise<JoinResponse> {
+    async join(patientId: number, actor: Actor, supplied?: ContactPreference): Promise<JoinResponse> {
       try {
         return await withTransaction(
           db,
@@ -44,7 +50,12 @@ export function waitlistService(db: Knex, clock?: Clock) {
             const existing = await repos.entries.findActiveByPatient(patientId);
             if (existing) return { entry: await toView(repos, existing), created: false };
 
+            const recorded = await repos.patients.preferenceOf(patientId);
+            if (recorded === null && supplied === undefined) throw new HttpError(409, 'preference_required');
+            if (recorded !== null && supplied !== undefined) throw new HttpError(409, 'preference_already_recorded');
+
             const entry = await repos.entries.create({ patientId, createdByType: actor.type, createdById: actor.id });
+            if (supplied !== undefined) await preferences.setIn(repos, patientId, supplied, actor, entry.id);
             await repos.audit.record({ action: 'entry_created', entryId: entry.id, actorType: actor.type, actorId: actor.id });
             return { entry: await toView(repos, entry), created: true };
           },
