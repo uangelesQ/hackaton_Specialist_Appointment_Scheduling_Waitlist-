@@ -2,8 +2,11 @@ import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { buildTestApp, type TestApp } from '../test/testApp.js';
 
-/** The contact preference is captured by hospital registration. Nothing in this app may change it. */
-describe('contact preference is read-only (1.5)', () => {
+/**
+ * A preference is written only through PUT /me/contact-preference (the patient) and by staff adding a
+ * caller who has none. Every other route stays unrouted, and nobody can name another patient (BR-011, BR-015).
+ */
+describe('no other way to change the contact preference (2.2)', () => {
   let t: TestApp;
 
   beforeEach(async () => {
@@ -26,7 +29,7 @@ describe('contact preference is read-only (1.5)', () => {
     ['PATCH', '/me'],
     ['PUT', '/me'],
     ['PATCH', '/me/contact-preference'],
-    ['PUT', '/me/contact-preference'],
+    ['POST', '/me/contact-preference'],
     ['POST', '/patients'],
   ];
 
@@ -40,35 +43,11 @@ describe('contact preference is read-only (1.5)', () => {
       const verb = method.toLowerCase() as 'patch' | 'put' | 'post';
       const res = await request(t.app)[verb](path)
         .set('Authorization', t.bearer(token(id)))
-        .send({ contactPreference: 'in_app', contact_preference: 'in_app' });
+        .send({ contactPreference: 'telephone', contact_preference: 'telephone' });
 
       expect(res.status).toBe(404);
       expect(await preferences()).toEqual(before);
     });
-  });
-
-  it('ignores a preference sent in the body when a patient joins', async () => {
-    const before = await preferences();
-
-    const res = await request(t.app)
-      .post('/waitlist')
-      .set('Authorization', t.bearer(t.patient(4)))
-      .send({ contactPreference: 'in_app', contact_preference: 'in_app' });
-
-    expect(res.status).toBe(201);
-    expect(await preferences()).toEqual(before);
-  });
-
-  it('ignores a preference sent in the body when staff add a patient', async () => {
-    const before = await preferences();
-
-    const res = await request(t.app)
-      .post('/waitlist/patients/5')
-      .set('Authorization', t.bearer(t.staff(1)))
-      .send({ contactPreference: 'in_app', contact_preference: 'in_app' });
-
-    expect(res.status).toBe(201);
-    expect(await preferences()).toEqual(before);
   });
 
   it('ignores a preference sent in the body of a release', async () => {
@@ -79,6 +58,18 @@ describe('contact preference is read-only (1.5)', () => {
       .post('/offers')
       .set('Authorization', t.bearer(t.staff(1)))
       .send({ startsAt: '2026-10-02T10:30:00.000Z', contactPreference: 'telephone' })
+      .expect(201);
+
+    expect(await preferences()).toEqual(before);
+  });
+
+  it('ignores a preference sent in the body when a patient who already has one joins', async () => {
+    const before = await preferences();
+
+    await request(t.app)
+      .post('/waitlist')
+      .set('Authorization', t.bearer(t.patient(4)))
+      .send({ contactPreference: 'in_app' })
       .expect(201);
 
     expect(await preferences()).toEqual(before);

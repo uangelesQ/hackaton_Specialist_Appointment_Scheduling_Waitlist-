@@ -34,6 +34,34 @@ describe('waitlist visibility', () => {
     });
   }
 
+  describe('patient view carries the contact preference (2.3)', () => {
+    it.each([
+      [1, 'in_app'],
+      [4, 'telephone'],
+      [5, null],
+    ])('returns the preference of patient %i with no entry', async (id, expected) => {
+      const res = await myWaitlist(id);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ contactPreference: expected, entry: null });
+    });
+
+    it('returns it alongside an entry', async () => {
+      await join(4);
+
+      expect((await myWaitlist(4)).body).toMatchObject({ contactPreference: 'telephone', entry: { status: 'waiting' } });
+    });
+
+    it('reflects a change on the next read, with or without an entry', async () => {
+      await join(1);
+      await request(t.app).put('/me/contact-preference').set('Authorization', t.bearer(t.patient(1))).send({ contactPreference: 'telephone' });
+      await request(t.app).put('/me/contact-preference').set('Authorization', t.bearer(t.patient(5))).send({ contactPreference: 'in_app' });
+
+      expect((await myWaitlist(1)).body.contactPreference).toBe('telephone');
+      expect((await myWaitlist(5)).body.contactPreference).toBe('in_app');
+    });
+  });
+
   describe('patient views own position (4.2)', () => {
     it('shows the position as a number with the join date and no total', async () => {
       const first = await join(1);
@@ -65,14 +93,14 @@ describe('waitlist visibility', () => {
       const res = await myWaitlist(1);
 
       expect(res.status).toBe(200);
-      expect(res.body).toEqual({ entry: null });
+      expect(res.body).toEqual({ contactPreference: 'in_app', entry: null });
     });
 
     it('treats a removed entry as not on the waitlist', async () => {
       const { body } = await join(1);
       await leave(body.entry.id, t.patient(1));
 
-      expect((await myWaitlist(1)).body).toEqual({ entry: null });
+      expect((await myWaitlist(1)).body).toEqual({ contactPreference: 'in_app', entry: null });
     });
 
     it("never returns another patient's entry, even when asked for it", async () => {

@@ -48,7 +48,13 @@ export interface MyEntryView {
 }
 
 export interface MyWaitlistResponse {
+  /** The patient's own contact preference; null means not recorded. Present whether or not they have an entry. */
+  contactPreference: ContactPreference | null;
   entry: MyEntryView | null;
+}
+
+export interface SetContactPreferenceResponse {
+  contactPreference: ContactPreference;
 }
 
 export interface StaffEntryView {

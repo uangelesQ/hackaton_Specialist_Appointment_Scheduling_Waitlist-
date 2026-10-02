@@ -3,6 +3,7 @@ import type { Knex } from 'knex';
 import { authenticate } from './auth/auth.js';
 import { errorHandler } from './http/errors.js';
 import type { Clock } from './repositories/index.js';
+import { contactPreferenceRouter } from './routes/contactPreference.js';
 import { demoRouter } from './routes/demo.js';
 import { offersRouter } from './routes/offers.js';
 import { patientsRouter } from './routes/patients.js';
@@ -30,6 +31,7 @@ export function createApp({ db, jwtSecret, clock, demoLogin = false }: AppDeps) 
   app.use(waitlistViewRouter(db, clock));
   app.use(offersRouter(db, clock));
   app.use(patientsRouter(db));
+  app.use(contactPreferenceRouter(db, clock));
 
   app.use(errorHandler);
   return app;

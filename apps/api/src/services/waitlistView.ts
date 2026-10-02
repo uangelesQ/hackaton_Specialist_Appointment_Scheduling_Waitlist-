@@ -13,10 +13,11 @@ export function waitlistViewService(db: Knex, clock?: Clock) {
       return withTransaction(
         db,
         async (repos) => {
+          const contactPreference = (await repos.patients.preferenceOf(patientId)) ?? null;
           const entry = await repos.entries.findActiveByPatient(patientId);
-          if (!entry) return { entry: null };
+          if (!entry) return { contactPreference, entry: null };
 
-          const responseChannel = responseChannelOf((await repos.patients.preferenceOf(patientId)) ?? null);
+          const responseChannel = responseChannelOf(contactPreference);
           const outstanding = await repos.offers.findOutstanding();
           const holdsOffer = outstanding?.entryId === entry.id;
 
@@ -30,6 +31,7 @@ export function waitlistViewService(db: Knex, clock?: Clock) {
           }
 
           return {
+            contactPreference,
             entry: {
               id: entry.id,
               status: entry.status,

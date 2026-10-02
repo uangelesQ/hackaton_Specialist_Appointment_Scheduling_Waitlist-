@@ -30,7 +30,7 @@ describe('patient waitlist view', () => {
 
   describe('joining, and a status instead of a queue position (5.1)', () => {
     it('invites a patient who is not on the waitlist to join', async () => {
-      api.myWaitlist.mockResolvedValue({ entry: null });
+      api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry: null });
       show();
 
       expect(await screen.findByText("You're not on the waitlist yet")).toBeInTheDocument();
@@ -38,7 +38,7 @@ describe('patient waitlist view', () => {
     });
 
     it('joins, then shows the waiting status', async () => {
-      api.myWaitlist.mockResolvedValueOnce({ entry: null }).mockResolvedValue({ entry: myEntry() });
+      api.myWaitlist.mockResolvedValueOnce({ contactPreference: 'in_app', entry: null }).mockResolvedValue({ contactPreference: 'in_app', entry: myEntry() });
       api.join.mockResolvedValue({
         created: true,
         entry: { id: 10, patientId: 1, status: 'waiting', position: 2, joinedAt: '2026-10-01T09:00:00.000Z' },
@@ -53,7 +53,7 @@ describe('patient waitlist view', () => {
     });
 
     it('shows a waiting patient the four-step status, the join date and what to expect', async () => {
-      api.myWaitlist.mockResolvedValue({ entry: myEntry({ position: 7 }) });
+      api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry: myEntry({ position: 7 }) });
       show();
 
       await screen.findByRole('heading', { name: "You're on the waitlist" });
@@ -73,7 +73,7 @@ describe('patient waitlist view', () => {
       ['notified with an in-app offer', myEntry({ status: 'notified', position: 7, offer })],
       ['notified and answered by staff', myEntry({ status: 'notified', position: 7, offer: null, holdsOffer: true, responseChannel: 'staff' })],
     ])('shows no queue position, no count and no leave control when %s', async (_label, entry) => {
-      api.myWaitlist.mockResolvedValue({ entry });
+      api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry });
       show();
 
       await screen.findByRole('heading', { name: "You're on the waitlist" });
@@ -88,7 +88,7 @@ describe('patient waitlist view', () => {
     });
 
     it('moves the status to Notified when the entry becomes notified', async () => {
-      api.myWaitlist.mockResolvedValue({ entry: heldInApp() });
+      api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry: heldInApp() });
       show();
 
       await screen.findByRole('status');
@@ -97,7 +97,7 @@ describe('patient waitlist view', () => {
     });
 
     it('tells a booked patient the slot and how to change it, with no leave control', async () => {
-      api.myWaitlist.mockResolvedValueOnce({ entry: heldInApp() }).mockResolvedValue({ entry: null });
+      api.myWaitlist.mockResolvedValueOnce({ contactPreference: 'in_app', entry: heldInApp() }).mockResolvedValue({ contactPreference: 'in_app', entry: null });
       api.accept.mockResolvedValue({
         entry: { id: 10, status: 'booked' },
         booking: { slotId: 1, slotStartsAt: SLOT, specialistName: 'Dr. Elena Ruiz' },
@@ -116,7 +116,7 @@ describe('patient waitlist view', () => {
     });
 
     it('shows the existing waiting status when a join finds the patient already on the list', async () => {
-      api.myWaitlist.mockResolvedValueOnce({ entry: null }).mockResolvedValue({ entry: myEntry() });
+      api.myWaitlist.mockResolvedValueOnce({ contactPreference: 'in_app', entry: null }).mockResolvedValue({ contactPreference: 'in_app', entry: myEntry() });
       api.join.mockResolvedValue({
         created: false,
         entry: { id: 10, patientId: 1, status: 'waiting', position: 2, joinedAt: '2026-10-01T09:00:00.000Z' },
@@ -130,7 +130,7 @@ describe('patient waitlist view', () => {
     });
 
     it('explains why a join was refused', async () => {
-      api.myWaitlist.mockResolvedValue({ entry: null });
+      api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry: null });
       api.join.mockRejectedValue(new ApiError(403, 'not_registered'));
       show();
 
@@ -150,7 +150,7 @@ describe('patient waitlist view', () => {
 
   describe('the banner is for in-app patients only (5.2)', () => {
     it('shows an in-app holder the banner, the slot, accept and decline, and what happens if unanswered', async () => {
-      api.myWaitlist.mockResolvedValue({ entry: heldInApp() });
+      api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry: heldInApp() });
       show();
 
       expect(await screen.findByRole('status')).toHaveTextContent('A slot just opened for you');
@@ -163,7 +163,7 @@ describe('patient waitlist view', () => {
     });
 
     it('does not show an in-app holder the neutral notice meant for patients staff call', async () => {
-      api.myWaitlist.mockResolvedValue({ entry: heldInApp() });
+      api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry: heldInApp() });
       show();
 
       await screen.findByRole('status');
@@ -174,7 +174,7 @@ describe('patient waitlist view', () => {
       ['a telephone patient'],
       ['a patient with no recorded preference'],
     ])('shows %s no banner and no accept or decline, only a notice that the team will contact them', async () => {
-      api.myWaitlist.mockResolvedValue({ entry: heldByStaffChannel() });
+      api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry: heldByStaffChannel() });
       show();
 
       expect(await screen.findByText(/team will contact you/i)).toBeInTheDocument();
@@ -186,7 +186,7 @@ describe('patient waitlist view', () => {
     });
 
     it('shows no notice and no banner to a patient staff call who is only waiting', async () => {
-      api.myWaitlist.mockResolvedValue({ entry: myEntry({ responseChannel: 'staff' }) });
+      api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry: myEntry({ responseChannel: 'staff' }) });
       show();
 
       await screen.findByRole('heading', { name: "You're on the waitlist" });
@@ -195,7 +195,7 @@ describe('patient waitlist view', () => {
     });
 
     it('shows no banner and no actions to an in-app patient who does not hold the offer', async () => {
-      api.myWaitlist.mockResolvedValue({ entry: myEntry() });
+      api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry: myEntry() });
       show();
 
       await screen.findByRole('heading', { name: "You're on the waitlist" });
@@ -207,7 +207,7 @@ describe('patient waitlist view', () => {
 
   describe('answering an offer in the app', () => {
     it('asks to confirm first, restating the slot date, time and specialist', async () => {
-      api.myWaitlist.mockResolvedValue({ entry: heldInApp() });
+      api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry: heldInApp() });
       show();
 
       fireEvent.click(await screen.findByRole('button', { name: 'Accept' }));
@@ -219,7 +219,7 @@ describe('patient waitlist view', () => {
     });
 
     it('makes no API call and keeps the offer when the patient goes back', async () => {
-      api.myWaitlist.mockResolvedValue({ entry: heldInApp() });
+      api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry: heldInApp() });
       show();
 
       fireEvent.click(await screen.findByRole('button', { name: 'Accept' }));
@@ -232,7 +232,7 @@ describe('patient waitlist view', () => {
     });
 
     it('declines and goes back to waiting with no banner', async () => {
-      api.myWaitlist.mockResolvedValueOnce({ entry: heldInApp() }).mockResolvedValue({ entry: myEntry({ position: 1 }) });
+      api.myWaitlist.mockResolvedValueOnce({ contactPreference: 'in_app', entry: heldInApp() }).mockResolvedValue({ contactPreference: 'in_app', entry: myEntry({ position: 1 }) });
       api.decline.mockResolvedValue({ entry: { id: 10, status: 'waiting', position: 1 } });
       show();
 
@@ -246,8 +246,8 @@ describe('patient waitlist view', () => {
 
     it('says so when the offer is no longer available', async () => {
       api.myWaitlist
-        .mockResolvedValueOnce({ entry: heldInApp() })
-        .mockResolvedValue({ entry: myEntry({ status: 'waiting', position: 1 }) });
+        .mockResolvedValueOnce({ contactPreference: 'in_app', entry: heldInApp() })
+        .mockResolvedValue({ contactPreference: 'in_app', entry: myEntry({ status: 'waiting', position: 1 }) });
       api.accept.mockRejectedValue(new ApiError(409, 'offer_not_available'));
       show();
 
@@ -260,7 +260,7 @@ describe('patient waitlist view', () => {
     });
 
     it('shows an error when declining fails', async () => {
-      api.myWaitlist.mockResolvedValue({ entry: heldInApp() });
+      api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry: heldInApp() });
       api.decline.mockRejectedValue(new ApiError(500, 'internal'));
       show();
 
@@ -272,7 +272,7 @@ describe('patient waitlist view', () => {
 
   describe('steps to respond (5.7)', () => {
     it('lets an in-app patient accept in two actions after the offer is shown: Accept, then Confirm', async () => {
-      api.myWaitlist.mockResolvedValueOnce({ entry: heldInApp() }).mockResolvedValue({ entry: null });
+      api.myWaitlist.mockResolvedValueOnce({ contactPreference: 'in_app', entry: heldInApp() }).mockResolvedValue({ contactPreference: 'in_app', entry: null });
       api.accept.mockResolvedValue({
         entry: { id: 10, status: 'booked' },
         booking: { slotId: 1, slotStartsAt: SLOT, specialistName: 'Dr. Elena Ruiz' },
@@ -295,7 +295,7 @@ describe('patient waitlist view', () => {
     });
 
     it('lets an in-app patient decline in one action', async () => {
-      api.myWaitlist.mockResolvedValueOnce({ entry: heldInApp() }).mockResolvedValue({ entry: myEntry({ position: 1 }) });
+      api.myWaitlist.mockResolvedValueOnce({ contactPreference: 'in_app', entry: heldInApp() }).mockResolvedValue({ contactPreference: 'in_app', entry: myEntry({ position: 1 }) });
       api.decline.mockResolvedValue({ entry: { id: 10, status: 'waiting', position: 1 } });
       show();
       await screen.findByRole('status');

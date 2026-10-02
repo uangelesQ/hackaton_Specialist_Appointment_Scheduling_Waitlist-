@@ -25,7 +25,7 @@ describe('sign-in and role routing (6.2)', () => {
   beforeEach(() => {
     api = createFakeApi();
     api.demoUsers.mockResolvedValue(USERS);
-    api.myWaitlist.mockResolvedValue({ entry: null });
+    api.myWaitlist.mockResolvedValue({ contactPreference: 'in_app', entry: null });
     api.staffWaitlist.mockResolvedValue(staffView());
     api.patients.mockResolvedValue({ patients: [] });
   });
