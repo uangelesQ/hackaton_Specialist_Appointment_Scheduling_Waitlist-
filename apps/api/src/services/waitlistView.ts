@@ -3,6 +3,7 @@ import type { MyWaitlistResponse, OfferBanner, ReleaseState, StaffWaitlistRespon
 import { withTransaction, type Clock } from '../repositories/index.js';
 import { nextEligibleEntry } from './offers.js';
 import { assignPositions } from './position.js';
+import { responseChannelOf } from './responseChannel.js';
 
 /** Read-only views. Every call reads current data in one transaction, so nothing here can go stale. */
 export function waitlistViewService(db: Knex, clock?: Clock) {
@@ -15,9 +16,14 @@ export function waitlistViewService(db: Knex, clock?: Clock) {
           const entry = await repos.entries.findActiveByPatient(patientId);
           if (!entry) return { entry: null };
 
+          const responseChannel = responseChannelOf((await repos.patients.preferenceOf(patientId)) ?? null);
           const outstanding = await repos.offers.findOutstanding();
+          const holdsOffer = outstanding?.entryId === entry.id;
+
+          // Only an in-app patient is shown the banner. A patient staff must call holds the offer too,
+          // but the app shows them no banner and no accept or decline: staff record the outcome.
           let offer: OfferBanner | null = null;
-          if (outstanding && outstanding.entryId === entry.id) {
+          if (outstanding && holdsOffer && responseChannel === 'in_app') {
             const slot = await repos.slots.findById(outstanding.slotId);
             const specialist = await repos.specialist.get();
             if (slot) offer = { id: outstanding.id, slotStartsAt: slot.startsAt, specialistName: specialist.name };
@@ -30,6 +36,8 @@ export function waitlistViewService(db: Knex, clock?: Clock) {
               position: await repos.entries.positionOf(entry),
               joinedAt: entry.joinedAt,
               offer,
+              holdsOffer,
+              responseChannel,
             },
           };
         },
@@ -43,9 +51,14 @@ export function waitlistViewService(db: Knex, clock?: Clock) {
         db,
         async (repos) => {
           const active = assignPositions(await repos.entries.listActive());
-          const names = await repos.patients.namesByIds(active.map((e) => e.patientId));
+          const patients = await repos.patients.byIds(active.map((e) => e.patientId));
           const outstanding = await repos.offers.findOutstanding();
           const slot = outstanding && (await repos.slots.findById(outstanding.slotId));
+          const holder = outstanding && active.find((e) => e.id === outstanding.entryId);
+          // Staff must call whoever does not answer in the app, including a patient with no recorded preference.
+          const holderRequiresCall = holder
+            ? responseChannelOf(patients.get(holder.patientId)?.contactPreference ?? null) === 'staff'
+            : false;
 
           const returned = await repos.slots.findOpen();
           const openSlotStartsAt = returned?.startsAt ?? null;
@@ -62,7 +75,8 @@ export function waitlistViewService(db: Knex, clock?: Clock) {
             entries: active.map((e) => ({
               id: e.id,
               patientId: e.patientId,
-              patientName: names.get(e.patientId) ?? '',
+              patientName: patients.get(e.patientId)?.fullName ?? '',
+              contactPreference: patients.get(e.patientId)?.contactPreference ?? null,
               status: e.status,
               position: e.position,
               joinedAt: e.joinedAt,
@@ -70,7 +84,13 @@ export function waitlistViewService(db: Knex, clock?: Clock) {
             })),
             offer:
               outstanding && slot
-                ? { id: outstanding.id, entryId: outstanding.entryId, slotStartsAt: slot.startsAt }
+                ? {
+                    id: outstanding.id,
+                    entryId: outstanding.entryId,
+                    slotStartsAt: slot.startsAt,
+                    requiresCall: holderRequiresCall,
+                    createdAt: outstanding.createdAt,
+                  }
                 : null,
             release,
           };

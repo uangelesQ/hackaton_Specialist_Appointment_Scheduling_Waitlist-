@@ -16,8 +16,8 @@ describe('demo login and patient lookup', () => {
       const res = await request(t.app).get('/demo/users');
 
       expect(res.status).toBe(200);
-      expect(res.body.patients).toHaveLength(5);
-      expect(res.body.patients[0]).toEqual({ id: 1, name: 'Ana Torres' });
+      expect(res.body.patients).toHaveLength(6);
+      expect(res.body.patients[0]).toEqual({ id: 1, name: 'Maria Gómez' });
       expect(res.body.staff).toEqual([
         { id: 1, name: 'Sam Patel' },
         { id: 2, name: 'Maria Gomez' },
@@ -32,7 +32,7 @@ describe('demo login and patient lookup', () => {
       expect(login.status).toBe(200);
       expect(login.body).toMatchObject({
         user: { role: 'patient', id: 2, name: 'Ben Carter' },
-        specialist: { name: 'Dr. Elena Ruiz', clinic: 'Dermatology' },
+        specialist: { name: 'Dr. Elena Ruiz', clinic: 'Cardiology' },
       });
       const me = await request(t.app).get('/me/waitlist').set('Authorization', `Bearer ${login.body.token}`);
       expect(me.status).toBe(200);
@@ -84,9 +84,24 @@ describe('demo login and patient lookup', () => {
       const res = await request(t.app).get('/patients').set('Authorization', t.bearer(t.staff(1)));
 
       expect(res.status).toBe(200);
-      expect(res.body.patients).toHaveLength(5);
-      expect(res.body.patients[1]).toEqual({ id: 2, name: 'Ben Carter', onWaitlist: true });
-      expect(res.body.patients[0]).toEqual({ id: 1, name: 'Ana Torres', onWaitlist: false });
+      expect(res.body.patients).toHaveLength(6);
+      expect(res.body.patients[1]).toEqual({ id: 2, name: 'Ben Carter', onWaitlist: true, contactPreference: 'in_app' });
+      expect(res.body.patients[0]).toEqual({ id: 1, name: 'Maria Gómez', onWaitlist: false, contactPreference: 'in_app' });
+    });
+
+    it('shows each patient\'s contact preference, keeping "not recorded" as null', async () => {
+      t = await buildTestApp();
+
+      const res = await request(t.app).get('/patients').set('Authorization', t.bearer(t.staff(1)));
+
+      expect(res.body.patients.map((p: { name: string; contactPreference: string | null }) => [p.name, p.contactPreference])).toEqual([
+        ['Maria Gómez', 'in_app'],
+        ['Ben Carter', 'in_app'],
+        ['Chloe Nguyen', 'in_app'],
+        ['Carlos Mendoza', 'telephone'],
+        ['Ana Torres', null],
+        ['Jorge Ramírez', 'telephone'],
+      ]);
     });
 
     it('stops counting a patient as on the waitlist once they are removed', async () => {

@@ -51,7 +51,7 @@ describe('waitlist end to end (7.1)', () => {
     // 2. Staff see both, in position order, and may release a slot.
     const before = await get<StaffWaitlistResponse>('/waitlist', staff);
     expect(before.entries.map((e) => [e.position, e.patientName, e.status])).toEqual([
-      [1, 'Ana Torres', 'waiting'],
+      [1, 'Maria Gómez', 'waiting'],
       [2, 'Ben Carter', 'waiting'],
     ]);
     expect(before.release).toMatchObject({ available: true, openSlotStartsAt: null });
@@ -94,7 +94,7 @@ describe('waitlist end to end (7.1)', () => {
 
     // 8. The booked entry has left the list; Ana is still first; nothing is outstanding.
     const after = await get<StaffWaitlistResponse>('/waitlist', staff);
-    expect(after.entries.map((e) => [e.position, e.patientName, e.status])).toEqual([[1, 'Ana Torres', 'waiting']]);
+    expect(after.entries.map((e) => [e.position, e.patientName, e.status])).toEqual([[1, 'Maria Gómez', 'waiting']]);
     expect(after.offer).toBeNull();
     expect((await get<MyWaitlistResponse>('/me/waitlist', ben)).entry).toBeNull();
     expect((await get<MyWaitlistResponse>('/me/waitlist', ana)).entry?.position).toBe(1);

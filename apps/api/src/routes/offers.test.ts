@@ -429,7 +429,7 @@ describe('slot offers', () => {
       await expectConsistent();
     });
 
-    it('only looks behind the holder, and raises no new offer when nobody is behind', async () => {
+    it('raises no new offer when nobody else is eligible', async () => {
       await join(1);
       await join(2);
       const first = await release();
@@ -441,7 +441,9 @@ describe('slot offers', () => {
       expect(last.body.offer).toBeNull();
       expect(await statuses()).toEqual(['waiting', 'waiting']);
       expect(await slotRow(first.body.offer.slotId)).toMatchObject({ status: 'open' });
-      expect((await staffList()).body.release.available).toBe(true);
+      // Both patients were passed over for this slot, and a passed-over patient is not offered it
+      // again, so there is nothing to release until someone else joins.
+      expect((await staffList()).body.release).toMatchObject({ available: false, reason: 'all_waiting_declined' });
     });
 
     it('returns the only patient to waiting with no new offer', async () => {
@@ -456,7 +458,7 @@ describe('slot offers', () => {
       expect(await slotRow(body.offer.slotId)).toMatchObject({ status: 'open' });
     });
 
-    it('skips a patient behind the holder who declined this slot', async () => {
+    it('skips patients who declined or were passed over for this slot', async () => {
       await join(1);
       const e2 = await join(2);
       const e3 = await join(3);
@@ -464,12 +466,14 @@ describe('slot offers', () => {
       const toTwo = await pass(first.body.offer.id);
       expect(toTwo.body.offer.entryId).toBe(e2);
       await decline(toTwo.body.offer.id, 2);
+
+      // 1 was passed over and 2 declined, so the slot goes to 3.
       const again = await release({});
-      expect(again.body.offer.entryId).not.toBe(e2);
+      expect(again.body.offer.entryId).toBe(e3);
 
+      // Passing 3 on leaves nobody eligible: 1 and 2 are excluded for this slot and 3 was just passed over.
       const res = await pass(again.body.offer.id);
-
-      expect(res.body.offer.entryId).toBe(e3);
+      expect(res.body.offer).toBeNull();
     });
 
     it('is audited with the staff member, the slot and the time', async () => {

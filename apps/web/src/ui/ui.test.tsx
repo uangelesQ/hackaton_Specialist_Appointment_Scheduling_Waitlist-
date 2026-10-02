@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { Alert, Banner, Button, Card, DataTable, MetaRow, Modal, PositionBadge, SlotCard, Stepper, StatusPill } from './ui';
+import { Alert, Banner, Button, Card, DataTable, MetaRow, Modal, PreferencePill, SlotCard, Stepper, StatusPill } from './ui';
 
 describe('Button', () => {
   it('renders its label, calls onClick, and respects disabled', () => {
@@ -16,6 +16,11 @@ describe('Button', () => {
       </Button>,
     );
     expect(screen.getByRole('button', { name: 'Join waitlist' })).toBeDisabled();
+  });
+
+  it('can be small, as the staff controls are', () => {
+    render(<Button small>Go</Button>);
+    expect(screen.getByRole('button', { name: 'Go' })).toHaveClass('btn-small');
   });
 
   it.each(['primary', 'secondary', 'decline'] as const)('applies the %s style', (variant) => {
@@ -36,14 +41,14 @@ describe('Card', () => {
   });
 });
 
-describe('PositionBadge', () => {
-  it('shows the position as #N with its label and sub text, and no total', () => {
-    render(<PositionBadge position={3} label="Your place in line" sub="Waiting for Dr. Elena Ruiz · Dermatology" />);
-
-    expect(screen.getByText('#3')).toBeInTheDocument();
-    expect(screen.getByText('Your place in line')).toBeInTheDocument();
-    expect(screen.getByText('Waiting for Dr. Elena Ruiz · Dermatology')).toBeInTheDocument();
-    expect(screen.queryByText(/of \d+/)).not.toBeInTheDocument();
+describe('PreferencePill', () => {
+  it.each([
+    ['in_app', 'In-app', 'pref-inapp'],
+    ['telephone', 'Telephone', 'pref-telephone'],
+    [null, 'Not recorded', 'pref-notrecorded'],
+  ] as const)('shows %s as "%s"', (preference, label, className) => {
+    render(<PreferencePill preference={preference} />);
+    expect(screen.getByText(label)).toHaveClass('pref-pill', className);
   });
 });
 

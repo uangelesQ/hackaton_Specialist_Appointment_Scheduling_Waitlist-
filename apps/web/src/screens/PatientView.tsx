@@ -5,18 +5,22 @@ import { useApi } from '../api/ApiContext';
 import { describeError } from '../api/client';
 import { formatJoinDate, formatSlot } from '../format';
 import { useSession } from '../session';
-import { Alert, Banner, Button, Card, MetaRow, Modal, PositionBadge, SlotCard, Stepper } from '../ui/ui';
+import { Alert, Banner, Button, Card, MetaRow, Modal, SlotCard, Stepper } from '../ui/ui';
 
 const POLL_MS = 10_000;
 const STEP_FOR_STATUS = { waiting: 1, notified: 2, booked: 3, removed: 0 } as const;
 
 type Booking = AcceptResponse['booking'];
 
+/**
+ * The patient's screen: where they stand as a status (Joined, Waiting, Notified, Booked), never as a
+ * queue position or a count. Leaving the waitlist is not offered in this iteration.
+ */
 export function PatientView() {
   const api = useApi();
   const queryClient = useQueryClient();
   const { session } = useSession();
-  const specialist = session?.specialist ?? { name: 'the specialist', clinic: '' };
+  const specialistName = session?.specialist.name ?? 'the specialist';
 
   const waitlist = useQuery({ queryKey: ['me', 'waitlist'], queryFn: () => api.myWaitlist(), refetchInterval: POLL_MS });
   const refresh = () => queryClient.invalidateQueries({ queryKey: ['me', 'waitlist'] });
@@ -25,7 +29,6 @@ export function PatientView() {
   const [notice, setNotice] = useState<string | null>(null);
   const [booking, setBooking] = useState<Booking | null>(null);
   const [confirmingAccept, setConfirmingAccept] = useState(false);
-  const [confirmingLeave, setConfirmingLeave] = useState(false);
 
   const failed = (err: unknown) => {
     setError(describeError(err));
@@ -41,17 +44,6 @@ export function PatientView() {
       void refresh();
     },
     onError: failed,
-  });
-
-  const leave = useMutation({
-    mutationFn: (entryId: number) => api.removeEntry(entryId),
-    onSuccess: () => {
-      setError(null);
-      setNotice(null);
-      void refresh();
-    },
-    onError: failed,
-    onSettled: () => setConfirmingLeave(false),
   });
 
   const accept = useMutation({
@@ -87,7 +79,7 @@ export function PatientView() {
       {!booking && waitlist.isPending && <p className="footnote">Loading…</p>}
       {!booking && waitlist.data && !entry && (
         <Card tone="empty" title="You're not on the waitlist yet">
-          <p>Join {specialist.name}'s waitlist and you'll see your position here — no need to call the office.</p>
+          <p>Join {specialistName}'s waitlist and you'll see your status here — no need to call the office.</p>
           <Button disabled={join.isPending} onClick={() => join.mutate()}>
             Join waitlist
           </Button>
@@ -96,11 +88,9 @@ export function PatientView() {
       {entry && (
         <EntryCard
           entry={entry}
-          specialist={specialist}
           busy={accept.isPending || decline.isPending}
           onAccept={() => setConfirmingAccept(true)}
           onDecline={(offerId) => decline.mutate(offerId)}
-          onLeave={() => setConfirmingLeave(true)}
         />
       )}
 
@@ -121,51 +111,32 @@ export function PatientView() {
           {formatSlot(entry.offer.slotStartsAt)} with {entry.offer.specialistName}. You're confirming this slot.
         </Modal>
       )}
-
-      {confirmingLeave && entry && (
-        <Modal
-          title="Leave the waitlist?"
-          actions={
-            <>
-              <Button variant="secondary" onClick={() => setConfirmingLeave(false)}>
-                Stay on waitlist
-              </Button>
-              <Button variant="decline" disabled={leave.isPending} onClick={() => leave.mutate(entry.id)}>
-                Leave
-              </Button>
-            </>
-          }
-        >
-          You will lose your place in line. You can join again later, but you would go to the back of the line.
-        </Modal>
-      )}
     </div>
   );
 }
 
 function EntryCard({
   entry,
-  specialist,
   busy,
   onAccept,
   onDecline,
-  onLeave,
 }: {
   entry: MyEntryView;
-  specialist: { name: string; clinic: string };
   busy: boolean;
   onAccept: () => void;
   onDecline: (offerId: number) => void;
-  onLeave: () => void;
 }) {
   const { offer } = entry;
+  // The patient holds an offer but staff answer for them: no banner and no actions, just a notice.
+  const answeredByStaff = entry.holdsOffer && !offer;
+
   return (
     <>
       {offer && <Banner>A slot just opened for you</Banner>}
       <Card title="You're on the waitlist">
         <Stepper current={STEP_FOR_STATUS[entry.status]} />
-        {!offer && <p>We'll notify you here the moment a slot opens. No need to call to check in.</p>}
-        <PositionBadge position={entry.position} label="Your place in line" sub={`Waiting for ${specialist.name} · ${specialist.clinic}`} />
+        {!offer && !answeredByStaff && <p>We'll notify you here the moment a slot opens. No need to call to check in.</p>}
+        {answeredByStaff && <p>A slot has opened for you. A member of our team will contact you about it.</p>}
         {offer && (
           <SlotCard when={formatSlot(offer.slotStartsAt)} who={`With ${offer.specialistName}`}>
             <Button variant="decline" disabled={busy} onClick={() => onDecline(offer.id)}>
@@ -180,15 +151,10 @@ function EntryCard({
           items={[
             { label: 'Joined', value: formatJoinDate(entry.joinedAt) },
             offer
-              ? { label: "If this offer isn't answered", value: 'It can be offered to the next patient' }
+              ? { label: "If this offer isn't answered", value: 'Staff can pass it to the next patient' }
               : { label: 'Notifications', value: 'Check here — no need to call' },
           ]}
         />
-        <div className="card-actions">
-          <Button variant="secondary" onClick={onLeave}>
-            Leave waitlist
-          </Button>
-        </div>
       </Card>
     </>
   );

@@ -13,7 +13,7 @@ import {
 
 const USERS = {
   patients: [
-    { id: 1, name: 'Ana Torres' },
+    { id: 1, name: 'Maria Gómez' },
     { id: 2, name: 'Ben Carter' },
   ],
   staff: [{ id: 1, name: 'Sam Patel' }],
@@ -34,7 +34,7 @@ describe('sign-in and role routing (6.2)', () => {
     renderWithProviders(<App />, { api });
 
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
-    expect(await screen.findByRole('button', { name: 'Ana Torres' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Maria Gómez' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ben Carter' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sam Patel' })).toBeInTheDocument();
     expect(screen.queryByText("You're not on the waitlist yet")).not.toBeInTheDocument();
@@ -44,7 +44,7 @@ describe('sign-in and role routing (6.2)', () => {
     api.login.mockResolvedValue({ ...patientSession, token: 'abc' });
     renderWithProviders(<App />, { api });
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Ana Torres' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Maria Gómez' }));
 
     await waitFor(() => expect(api.login).toHaveBeenCalledWith('patient', 1));
     expect(await screen.findByText("You're not on the waitlist yet")).toBeInTheDocument();
@@ -67,8 +67,8 @@ describe('sign-in and role routing (6.2)', () => {
 
     expect(await screen.findByText("You're not on the waitlist yet")).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Dr. Elena Ruiz' })).toBeInTheDocument();
-    expect(screen.getByText(/Dermatology/)).toBeInTheDocument();
-    expect(screen.getByText(/Ana Torres/)).toBeInTheDocument();
+    expect(screen.getByText(/Cardiology/)).toBeInTheDocument();
+    expect(screen.getByText(/Maria Gómez/)).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Sign in' })).not.toBeInTheDocument();
   });
 
@@ -93,7 +93,7 @@ describe('sign-in and role routing (6.2)', () => {
     api.login.mockRejectedValue(new ApiError(401, 'unknown_user'));
     renderWithProviders(<App />, { api });
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Ana Torres' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Maria Gómez' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong');
     expect(screen.getByRole('heading', { name: 'Sign in' })).toBeInTheDocument();

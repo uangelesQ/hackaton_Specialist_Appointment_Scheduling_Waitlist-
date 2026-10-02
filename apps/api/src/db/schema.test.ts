@@ -85,6 +85,46 @@ describe('waitlist schema', () => {
     });
   });
 
+  describe('patients.contact_preference (1.1)', () => {
+    const setPreference = (id: number, value: string | null) => db('patients').where({ id }).update({ contact_preference: value });
+
+    it.each(['in_app', 'telephone'])('accepts %s', async (value) => {
+      await setPreference(1, value);
+      expect((await db('patients').where({ id: 1 }).first()).contact_preference).toBe(value);
+    });
+
+    it('accepts null, meaning not recorded', async () => {
+      await setPreference(1, 'telephone');
+      await setPreference(1, null);
+      expect((await db('patients').where({ id: 1 }).first()).contact_preference).toBeNull();
+    });
+
+    it.each(['sms', 'email', '', 'IN_APP'])('rejects %j', async (value) => {
+      await expect(setPreference(1, value)).rejects.toThrow(/CHECK/i);
+    });
+  });
+
+  describe('slots booked at a given time (1.1)', () => {
+    const TIME = '2026-10-02T10:30:00.000Z';
+    const slot = (status: string, startsAt = TIME) => db('slots').insert({ starts_at: startsAt, status });
+
+    it('rejects a second booked slot at the same time', async () => {
+      await slot('booked');
+      await expect(slot('booked')).rejects.toThrow(/UNIQUE/i);
+    });
+
+    it('allows booked slots at different times', async () => {
+      await slot('booked');
+      await expect(slot('booked', '2026-10-09T10:30:00.000Z')).resolves.toBeDefined();
+    });
+
+    it('only constrains booked slots: open and offered slots may share a time', async () => {
+      await slot('open');
+      await expect(slot('offered')).resolves.toBeDefined();
+      await expect(slot('booked')).resolves.toBeDefined();
+    });
+  });
+
   describe('audit_log', () => {
     it('stores actor, action and time', async () => {
       await db('audit_log').insert({ action: 'entry_created', actor_type: 'staff', actor_id: 1, at: NOW });

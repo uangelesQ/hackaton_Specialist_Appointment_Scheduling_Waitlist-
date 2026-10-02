@@ -1,4 +1,24 @@
 import type { Knex } from 'knex';
+import type { ContactPreference } from '@waitlist/shared';
+
+export interface PatientRecord {
+  id: number;
+  fullName: string;
+  /** How the patient asked to be reached; null means not recorded. */
+  contactPreference: ContactPreference | null;
+}
+
+interface PatientRow {
+  id: number;
+  full_name: string;
+  contact_preference: ContactPreference | null;
+}
+
+const toRecord = (row: PatientRow): PatientRecord => ({
+  id: row.id,
+  fullName: row.full_name,
+  contactPreference: row.contact_preference,
+});
 
 export function patientRepository(db: Knex | Knex.Transaction) {
   return {
@@ -7,20 +27,31 @@ export function patientRepository(db: Knex | Knex.Transaction) {
       return row !== undefined;
     },
 
-    async findById(id: number): Promise<{ id: number; fullName: string } | undefined> {
-      const row: { id: number; full_name: string } | undefined = await db('patients').where({ id }).first();
-      return row && { id: row.id, fullName: row.full_name };
+    async findById(id: number): Promise<PatientRecord | undefined> {
+      const row: PatientRow | undefined = await db('patients').where({ id }).first();
+      return row && toRecord(row);
     },
 
-    async list(): Promise<{ id: number; fullName: string }[]> {
-      const rows: { id: number; full_name: string }[] = await db('patients').orderBy('id');
-      return rows.map((row) => ({ id: row.id, fullName: row.full_name }));
+    async list(): Promise<PatientRecord[]> {
+      const rows: PatientRow[] = await db('patients').orderBy('id');
+      return rows.map(toRecord);
     },
 
-    /** Display names keyed by patient id. Unknown ids are simply absent. */
-    async namesByIds(ids: readonly number[]): Promise<Map<number, string>> {
-      const rows: { id: number; full_name: string }[] = await db('patients').whereIn('id', [...ids]).select('id', 'full_name');
-      return new Map(rows.map((row) => [row.id, row.full_name]));
+    /**
+     * The patient's recorded contact preference: `null` when none is recorded, `undefined` when
+     * there is no such patient. The two are different, so callers must not collapse them.
+     */
+    async preferenceOf(id: number): Promise<ContactPreference | null | undefined> {
+      const row: { contact_preference: ContactPreference | null } | undefined = await db('patients')
+        .where({ id })
+        .first('contact_preference');
+      return row === undefined ? undefined : row.contact_preference;
+    },
+
+    /** Patient records keyed by id. Unknown ids are simply absent. */
+    async byIds(ids: readonly number[]): Promise<Map<number, PatientRecord>> {
+      const rows: PatientRow[] = await db('patients').whereIn('id', [...ids]);
+      return new Map(rows.map((row) => [row.id, toRecord(row)]));
     },
   };
 }

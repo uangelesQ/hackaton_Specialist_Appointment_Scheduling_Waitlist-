@@ -12,7 +12,12 @@ export function patientsRouter(db: Knex): Router {
     const repos = createRepositories(db);
     const onWaitlist = new Set((await repos.entries.listActive()).map((e) => e.patientId));
     const body: PatientsResponse = {
-      patients: (await repos.patients.list()).map((p) => ({ id: p.id, name: p.fullName, onWaitlist: onWaitlist.has(p.id) })),
+      patients: (await repos.patients.list()).map((p) => ({
+        id: p.id,
+        name: p.fullName,
+        onWaitlist: onWaitlist.has(p.id),
+        contactPreference: p.contactPreference,
+      })),
     };
     res.json(body);
   });

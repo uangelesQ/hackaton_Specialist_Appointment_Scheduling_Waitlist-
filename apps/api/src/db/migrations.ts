@@ -79,6 +79,25 @@ const migrations: Record<string, Knex.Migration> = {
       await db.schema.dropTable('waitlist_entries');
     },
   },
+  '003_contact_preference': {
+    async up(db) {
+      // How the patient asked to be reached. Null means not recorded; the service treats it as telephone.
+      // Captured by hospital registration, so this app only reads it.
+      await db.raw(
+        `ALTER TABLE patients ADD COLUMN contact_preference TEXT
+         CHECK (contact_preference IN ('in_app', 'telephone'))`,
+      );
+      // A booked slot is taken: the same date and time can be booked only once (single specialist).
+      await db.raw(
+        `CREATE UNIQUE INDEX slots_one_booked_per_time
+         ON slots (starts_at) WHERE status = 'booked'`,
+      );
+    },
+    async down(db) {
+      await db.raw('DROP INDEX slots_one_booked_per_time');
+      await db.raw('ALTER TABLE patients DROP COLUMN contact_preference');
+    },
+  },
 };
 
 // Migrations are registered in code so they work the same under tsx, vitest and tsc output.

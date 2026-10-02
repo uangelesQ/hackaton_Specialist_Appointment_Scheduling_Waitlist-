@@ -4,6 +4,13 @@ export type EntryStatus = (typeof ENTRY_STATUSES)[number];
 export const ROLES = ['patient', 'staff'] as const;
 export type Role = (typeof ROLES)[number];
 
+/** How a patient asked to be reached. A patient with no recorded preference has `null`. */
+export const CONTACT_PREFERENCES = ['in_app', 'telephone'] as const;
+export type ContactPreference = (typeof CONTACT_PREFERENCES)[number];
+
+/** Who answers an offer for a patient: the patient in the app, or staff on their behalf. */
+export type ResponseChannel = 'in_app' | 'staff';
+
 // --- API contract: response bodies shared by the API and the web app ---
 
 export interface EntryView {
@@ -29,9 +36,15 @@ export interface OfferBanner {
 export interface MyEntryView {
   id: number;
   status: EntryStatus;
+  /** Kept in the response although this iteration's screens do not show it. */
   position: number;
   joinedAt: string;
+  /** The banner data. Only an in-app holder of the outstanding offer gets it; everyone else gets null. */
   offer: OfferBanner | null;
+  /** True for whoever holds the outstanding offer, whatever their channel. */
+  holdsOffer: boolean;
+  /** Who answers offers for this patient: themselves in the app, or staff on their behalf. */
+  responseChannel: ResponseChannel;
 }
 
 export interface MyWaitlistResponse {
@@ -42,6 +55,8 @@ export interface StaffEntryView {
   id: number;
   patientId: number;
   patientName: string;
+  /** How the patient asked to be reached; null means not recorded. */
+  contactPreference: ContactPreference | null;
   status: EntryStatus;
   position: number;
   joinedAt: string;
@@ -59,7 +74,15 @@ export interface ReleaseState {
 
 export interface StaffWaitlistResponse {
   entries: StaffEntryView[];
-  offer: { id: number; entryId: number; slotStartsAt: string } | null;
+  offer: {
+    id: number;
+    entryId: number;
+    slotStartsAt: string;
+    /** The holder is reached by telephone (or has no recorded preference), so staff must call. */
+    requiresCall: boolean;
+    /** When the offer was made, so the screen can show how long it has been outstanding. */
+    createdAt: string;
+  } | null;
   release: ReleaseState;
 }
 
@@ -95,6 +118,8 @@ export interface PatientSummary {
   id: number;
   name: string;
   onWaitlist: boolean;
+  /** How the patient asked to be reached; null means not recorded. */
+  contactPreference: ContactPreference | null;
 }
 
 export interface PatientsResponse {

@@ -22,6 +22,31 @@ describe('repositories', () => {
     await db.destroy();
   });
 
+  describe('patients (1.2)', () => {
+    const setPreference = (id: number, value: string | null) => db('patients').where({ id }).update({ contact_preference: value });
+
+    it.each([
+      ['in_app', 'in_app'],
+      ['telephone', 'telephone'],
+      [null, null],
+    ])('reads preference %j as %j', async (stored, expected) => {
+      await setPreference(1, stored);
+      expect(await createRepositories(db, clock).patients.preferenceOf(1)).toBe(expected);
+    });
+
+    it('returns undefined for a patient that does not exist, which is different from not recorded', async () => {
+      expect(await createRepositories(db, clock).patients.preferenceOf(99)).toBeUndefined();
+    });
+
+    it('includes the preference on a patient record and on the list', async () => {
+      await setPreference(2, 'telephone');
+      const { patients } = createRepositories(db, clock);
+
+      expect(await patients.findById(2)).toMatchObject({ id: 2, contactPreference: 'telephone' });
+      expect((await patients.list()).find((p) => p.id === 2)?.contactPreference).toBe('telephone');
+    });
+  });
+
   describe('entries', () => {
     it('creates a waiting entry with the creator and join time', async () => {
       const { entries } = createRepositories(db, clock);
@@ -117,6 +142,65 @@ describe('repositories', () => {
       expect(stored?.status).toBe('accepted');
       expect(stored?.resolvedAt).not.toBeNull();
       expect(await repos.offers.findOutstanding()).toBeUndefined();
+    });
+  });
+
+  describe('offers: excludedPatientIds (2.1)', () => {
+    async function setup() {
+      const repos = createRepositories(db, clock);
+      const slotA = await repos.slots.create('2026-10-02T10:30:00.000Z');
+      const slotB = await repos.slots.create('2026-10-09T10:30:00.000Z');
+      const entry = (patientId: number) => repos.entries.create({ patientId, createdByType: 'patient', createdById: patientId });
+      const e1 = await entry(1);
+      const e2 = await entry(2);
+      const e3 = await entry(3);
+      return { repos, slotA, slotB, e1, e2, e3 };
+    }
+
+    // Offers are inserted directly so several can exist for one slot, as they do over time.
+    const offer = (slotId: number, entryId: number, status: string) =>
+      db('slot_offers').insert({ slot_id: slotId, entry_id: entryId, status, created_at: '2026-10-01T09:00:00.000Z', released_by: 1 });
+
+    it('includes patients who declined and patients who were passed over', async () => {
+      const { repos, slotA, e1, e2 } = await setup();
+      await offer(slotA.id, e1.id, 'declined');
+      await offer(slotA.id, e2.id, 'passed_on');
+
+      expect((await repos.offers.excludedPatientIds(slotA.id)).sort()).toEqual([1, 2]);
+    });
+
+    it('leaves out outstanding, accepted and closed offers', async () => {
+      const { repos, slotA, e1, e2, e3 } = await setup();
+      await offer(slotA.id, e1.id, 'accepted');
+      await offer(slotA.id, e2.id, 'closed');
+      await offer(slotA.id, e3.id, 'outstanding');
+
+      expect(await repos.offers.excludedPatientIds(slotA.id)).toEqual([]);
+    });
+
+    it('is specific to the slot', async () => {
+      const { repos, slotA, slotB, e1 } = await setup();
+      await offer(slotA.id, e1.id, 'declined');
+
+      expect(await repos.offers.excludedPatientIds(slotA.id)).toEqual([1]);
+      expect(await repos.offers.excludedPatientIds(slotB.id)).toEqual([]);
+    });
+
+    it('follows the patient, not the entry, so rejoining does not make them eligible again', async () => {
+      const { repos, slotA, e1 } = await setup();
+      await offer(slotA.id, e1.id, 'passed_on');
+      await repos.entries.transition(e1.id, ['waiting'], 'removed');
+      await repos.entries.create({ patientId: 1, createdByType: 'patient', createdById: 1 });
+
+      expect(await repos.offers.excludedPatientIds(slotA.id)).toEqual([1]);
+    });
+
+    it('lists a patient once however many offers excluded them', async () => {
+      const { repos, slotA, e1 } = await setup();
+      await offer(slotA.id, e1.id, 'declined');
+      await offer(slotA.id, e1.id, 'passed_on');
+
+      expect(await repos.offers.excludedPatientIds(slotA.id)).toEqual([1]);
     });
   });
 

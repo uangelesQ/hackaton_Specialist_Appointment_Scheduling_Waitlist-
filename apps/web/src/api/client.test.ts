@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ApiError, createApiClient } from './client';
+import { ApiError, createApiClient, describeError } from './client';
 
 function jsonResponse(status: number, body: unknown) {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
@@ -49,6 +49,8 @@ describe('api client', () => {
     await client.removeEntry(7);
     await client.accept(3);
     await client.decline(3);
+    await client.recordAccept(3);
+    await client.recordDecline(3);
     await client.pass(3);
     await client.staffWaitlist();
     await client.patients();
@@ -59,6 +61,8 @@ describe('api client', () => {
       'DELETE /api/waitlist/7',
       'POST /api/offers/3/accept',
       'POST /api/offers/3/decline',
+      'POST /api/offers/3/record-accept',
+      'POST /api/offers/3/record-decline',
       'POST /api/offers/3/pass',
       'GET /api/waitlist',
       'GET /api/patients',
@@ -93,5 +97,33 @@ describe('api client', () => {
     await expect(client.login('patient', 99)).rejects.toMatchObject({ code: 'unknown_user' });
 
     expect(onUnauthorized).not.toHaveBeenCalled();
+  });
+});
+
+describe('describeError', () => {
+  const message = (code: string) => describeError(new ApiError(409, code));
+
+  it.each([
+    ['response_by_staff', /staff/i],
+    ['patient_responds_in_app', /in the app/i],
+    ['slot_already_booked', /already booked/i],
+    ['patient_not_found', /not registered/i],
+    ['offer_not_available', /no longer available/i],
+    ['offer_outstanding', /already waiting/i],
+    ['no_eligible_patient', /no eligible patient/i],
+    ['entry_not_active', /no longer on the waitlist/i],
+  ])('explains %s in words a user can act on', (code, expected) => {
+    expect(message(code)).toMatch(expected);
+  });
+
+  it('never shows the raw error code', () => {
+    for (const code of ['response_by_staff', 'patient_responds_in_app', 'slot_already_booked', 'patient_not_found']) {
+      expect(message(code)).not.toContain('_');
+    }
+  });
+
+  it('falls back to a generic message for anything unexpected', () => {
+    expect(message('something_new')).toBe('Something went wrong. Please try again.');
+    expect(describeError(new Error('network down'))).toBe('Something went wrong. Please try again.');
   });
 });

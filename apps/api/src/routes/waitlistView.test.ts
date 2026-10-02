@@ -126,7 +126,7 @@ describe('waitlist visibility', () => {
       expect(res.status).toBe(200);
       expect(res.body.entries).toEqual([
         expect.objectContaining({ position: 1, patientId: 3, patientName: 'Chloe Nguyen', status: 'waiting' }),
-        expect.objectContaining({ position: 2, patientId: 1, patientName: 'Ana Torres', status: 'waiting' }),
+        expect.objectContaining({ position: 2, patientId: 1, patientName: 'Maria Gómez', status: 'waiting' }),
         expect.objectContaining({ position: 3, patientId: 2, patientName: 'Ben Carter', status: 'waiting' }),
       ]);
       expect(res.body.entries[0].joinedAt).toEqual(expect.any(String));
@@ -168,6 +168,8 @@ describe('waitlist visibility', () => {
         id: 1,
         entryId: second.body.entry.id,
         slotStartsAt: '2026-10-02T10:30:00.000Z',
+        requiresCall: false, // patient 2 is in-app
+        createdAt: '2026-10-01T09:30:00.000Z',
       });
       expect(res.body.entries.map((e: { status: string; holdsOffer: boolean }) => [e.status, e.holdsOffer])).toEqual([
         ['waiting', false],

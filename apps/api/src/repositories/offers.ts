@@ -49,12 +49,16 @@ export function offerRepository(db: Knex | Knex.Transaction, clock: Clock) {
       return row && toRecord(row);
     },
 
-    /** Patients who declined an offer for this slot. Tied to the patient, so it survives a rejoin. */
-    async declinedPatientIds(slotId: number): Promise<number[]> {
+    /**
+     * Patients who must not be offered this slot again: those who declined it and those who were
+     * passed over for it. Tied to the patient, not the entry, so rejoining does not clear it.
+     */
+    async excludedPatientIds(slotId: number): Promise<number[]> {
       const rows: { patient_id: number }[] = await db('slot_offers as o')
         .join('waitlist_entries as e', 'e.id', 'o.entry_id')
-        .where({ 'o.slot_id': slotId, 'o.status': 'declined' })
-        .select('e.patient_id');
+        .where('o.slot_id', slotId)
+        .whereIn('o.status', ['declined', 'passed_on'])
+        .distinct('e.patient_id');
       return rows.map((row) => row.patient_id);
     },
 

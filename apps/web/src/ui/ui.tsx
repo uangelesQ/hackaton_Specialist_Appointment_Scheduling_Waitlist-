@@ -1,13 +1,14 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
-import type { EntryStatus } from '@waitlist/shared';
+import type { ContactPreference, EntryStatus } from '@waitlist/shared';
 
 type Variant = 'primary' | 'secondary' | 'decline';
 
 export function Button({
   variant = 'primary',
+  small = false,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
-  return <button type="button" {...props} className={`btn btn-${variant}`} />;
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; small?: boolean }) {
+  return <button type="button" {...props} className={`btn btn-${variant}${small ? ' btn-small' : ''}`} />;
 }
 
 export function Card({ title, children, tone }: { title?: string; children: ReactNode; tone?: 'confirm' | 'empty' }) {
@@ -16,18 +17,6 @@ export function Card({ title, children, tone }: { title?: string; children: Reac
       {title && <h2>{title}</h2>}
       {children}
     </section>
-  );
-}
-
-export function PositionBadge({ position, label, sub }: { position: number; label: string; sub: string }) {
-  return (
-    <div className="position-row">
-      <div className="position-badge">#{position}</div>
-      <div className="position-text">
-        <div className="label">{label}</div>
-        <div className="sub">{sub}</div>
-      </div>
-    </div>
   );
 }
 
@@ -135,4 +124,16 @@ const STATUS_LABELS: Partial<Record<EntryStatus, string>> = {
 
 export function StatusPill({ status }: { status: EntryStatus }) {
   return <span className={`status-pill status-${status}`}>{STATUS_LABELS[status] ?? status}</span>;
+}
+
+const PREFERENCE_PILLS = {
+  in_app: { label: 'In-app', className: 'pref-inapp' },
+  telephone: { label: 'Telephone', className: 'pref-telephone' },
+  notRecorded: { label: 'Not recorded', className: 'pref-notrecorded' },
+} as const;
+
+/** How a patient asked to be reached. `null` is shown as "Not recorded", never as telephone. */
+export function PreferencePill({ preference }: { preference: ContactPreference | null }) {
+  const { label, className } = PREFERENCE_PILLS[preference ?? 'notRecorded'];
+  return <span className={`pref-pill ${className}`}>{label}</span>;
 }

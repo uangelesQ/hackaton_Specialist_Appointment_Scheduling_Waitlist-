@@ -32,6 +32,15 @@ export function offersRouter(db: Knex, clock?: Clock): Router {
     res.json(await offers.decline(idParam.parse(req.params.offerId), actorOf(req.auth)));
   });
 
+  // Staff record the outcome of a call to a patient who answers by telephone (or has no recorded preference).
+  router.post('/offers/:offerId/record-accept', requireRole('staff'), async (req, res) => {
+    res.json(await offers.recordAccept(idParam.parse(req.params.offerId), actorOf(req.auth)));
+  });
+
+  router.post('/offers/:offerId/record-decline', requireRole('staff'), async (req, res) => {
+    res.json(await offers.recordDecline(idParam.parse(req.params.offerId), actorOf(req.auth)));
+  });
+
   router.post('/offers/:offerId/pass', requireRole('staff'), async (req, res) => {
     res.json(await offers.passOn(idParam.parse(req.params.offerId), actorOf(req.auth)));
   });

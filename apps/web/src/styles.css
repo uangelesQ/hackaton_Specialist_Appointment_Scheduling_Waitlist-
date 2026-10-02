@@ -15,6 +15,8 @@
   --coral-text: #712b13;
   --coral-solid: #d85a30;
   --gray-bg: #f1efe8;
+  --slate-bg: #eceef2;
+  --slate-text: #39465c;
 }
 * {
   box-sizing: border-box;
@@ -113,6 +115,10 @@ h1 {
   color: var(--coral-text);
   border: 1px solid var(--coral-line);
 }
+.btn-small {
+  padding: 7px 12px;
+  font-size: 13px;
+}
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -152,36 +158,6 @@ h1 {
   padding: 12px 16px;
   font-size: 14px;
   margin-bottom: 16px;
-}
-
-.position-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 16px 0;
-}
-.position-badge {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: var(--teal-bg);
-  color: var(--teal-text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  font-family: 'Source Serif 4', Georgia, serif;
-  font-size: 20px;
-  font-weight: 600;
-}
-.position-text .label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ink);
-}
-.position-text .sub {
-  font-size: 13px;
-  color: var(--ink-soft);
 }
 
 .meta-row {
@@ -307,12 +283,29 @@ tr:last-child td {
   font-weight: 600;
   width: 36px;
 }
-.status-pill {
+.status-pill,
+.pref-pill {
   display: inline-block;
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
+  white-space: nowrap;
+}
+.pref-inapp {
+  background: var(--slate-bg);
+  color: var(--slate-text);
+}
+.pref-telephone,
+.pref-notrecorded {
+  background: var(--coral-bg);
+  color: var(--coral-text);
+}
+.call-flag {
+  font-size: 12px;
+  color: var(--coral-text);
+  font-weight: 500;
+  margin-top: 4px;
 }
 .status-waiting {
   background: var(--gray-bg);
@@ -346,6 +339,11 @@ tr:last-child td {
   color: var(--ink);
   font-weight: 600;
 }
+.control-sub {
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-top: 4px;
+}
 .control-fields {
   display: flex;
   align-items: center;
@@ -361,12 +359,27 @@ tr:last-child td {
   background: var(--card);
   color: var(--ink);
 }
-.add-row {
+.add-panel {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 20px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+.add-label {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.add-msg {
+  font-size: 13px;
+  margin: -6px 0 16px;
+}
+.add-msg.ok {
+  color: var(--teal-text);
 }
 
 .empty-state {
@@ -388,10 +401,6 @@ tr:last-child td {
   color: var(--ink-faint);
   margin-top: 24px;
 }
-.card-actions {
-  margin-top: 20px;
-}
-
 .modal-overlay {
   display: flex;
   position: fixed;

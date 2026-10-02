@@ -31,6 +31,9 @@ export interface ApiClient {
   removeEntry(entryId: number): Promise<RemoveResponse>;
   accept(offerId: number): Promise<AcceptResponse>;
   decline(offerId: number): Promise<DeclineResponse>;
+  /** Staff record that a patient they reached by telephone accepted or declined. */
+  recordAccept(offerId: number): Promise<AcceptResponse>;
+  recordDecline(offerId: number): Promise<DeclineResponse>;
   staffWaitlist(): Promise<StaffWaitlistResponse>;
   patients(): Promise<PatientsResponse>;
   addPatient(patientId: number): Promise<JoinResponse>;
@@ -77,6 +80,8 @@ export function createApiClient(
     removeEntry: (entryId) => request('DELETE', `/waitlist/${entryId}`),
     accept: (offerId) => request('POST', `/offers/${offerId}/accept`),
     decline: (offerId) => request('POST', `/offers/${offerId}/decline`),
+    recordAccept: (offerId) => request('POST', `/offers/${offerId}/record-accept`),
+    recordDecline: (offerId) => request('POST', `/offers/${offerId}/record-decline`),
     staffWaitlist: () => request('GET', '/waitlist'),
     patients: () => request('GET', '/patients'),
     addPatient: (patientId) => request('POST', `/waitlist/patients/${patientId}`),
@@ -99,6 +104,14 @@ export function describeError(err: unknown): string {
       return 'That patient is no longer on the waitlist.';
     case 'not_registered':
       return 'You are not registered as a patient, so you cannot join the waitlist.';
+    case 'response_by_staff':
+      return 'Staff will record your answer for you, so it cannot be given in the app.';
+    case 'patient_responds_in_app':
+      return 'This patient answers in the app, so staff cannot record a response for them.';
+    case 'slot_already_booked':
+      return 'That slot is already booked. Choose a different date and time.';
+    case 'patient_not_found':
+      return 'That person is not registered in hospital records. They must register before joining the waitlist.';
     case 'forbidden':
       return 'You are not allowed to do that.';
     default:

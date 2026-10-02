@@ -23,6 +23,12 @@ export function slotRepository(db: Knex | Knex.Transaction) {
       return row && toRecord(row);
     },
 
+    /** The booked slot at this exact instant, if any. `startsAt` must already be a canonical ISO instant. */
+    async findBookedAt(startsAt: string): Promise<SlotRecord | undefined> {
+      const row = await table().where({ starts_at: startsAt, status: 'booked' }).first();
+      return row && toRecord(row);
+    },
+
     /** The returned slot waiting to be released again, if any. There is at most one at a time. */
     async findOpen(): Promise<SlotRecord | undefined> {
       const row = await table().where({ status: 'open' }).orderBy('id').first();

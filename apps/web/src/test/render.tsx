@@ -17,6 +17,8 @@ const METHODS: (keyof ApiClient)[] = [
   'removeEntry',
   'accept',
   'decline',
+  'recordAccept',
+  'recordDecline',
   'staffWaitlist',
   'patients',
   'addPatient',
@@ -50,11 +52,11 @@ export function renderWithProviders(ui: ReactNode, options: { api?: FakeApi; ses
 
 // --- fixtures ---------------------------------------------------------------
 
-export const SPECIALIST = { name: 'Dr. Elena Ruiz', clinic: 'Dermatology' };
+export const SPECIALIST = { name: 'Dr. Elena Ruiz', clinic: 'Cardiology' };
 
 export const patientSession: Session = {
   token: 'patient-token',
-  user: { role: 'patient', id: 1, name: 'Ana Torres' },
+  user: { role: 'patient', id: 1, name: 'Maria Gómez' },
   specialist: SPECIALIST,
 };
 
@@ -72,16 +74,29 @@ export const myEntry = (overrides: Partial<MyEntryView> = {}): MyEntryView => ({
   position: 2,
   joinedAt: '2026-10-01T09:00:00.000Z',
   offer: null,
+  responseChannel: 'in_app',
   ...overrides,
+  // A banner implies the patient holds the offer; callers can still set it explicitly.
+  holdsOffer: overrides.holdsOffer ?? overrides.offer != null,
 });
 
 export const staffEntry = (overrides: Partial<StaffEntryView> & { id: number }): StaffEntryView => ({
   patientId: overrides.id,
   patientName: `Patient ${overrides.id}`,
+  contactPreference: 'in_app',
   status: 'waiting',
   position: 1,
   joinedAt: '2026-10-01T09:00:00.000Z',
   holdsOffer: false,
+  ...overrides,
+});
+
+export const staffOffer = (
+  overrides: Partial<NonNullable<StaffWaitlistResponse['offer']>> & { id: number; entryId: number },
+): NonNullable<StaffWaitlistResponse['offer']> => ({
+  slotStartsAt: SLOT,
+  requiresCall: false,
+  createdAt: '2026-10-01T09:30:00.000Z',
   ...overrides,
 });
 

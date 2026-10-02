@@ -1,22 +1,46 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import type { StaffEntryView, StaffWaitlistResponse } from '@waitlist/shared';
+import { useEffect, useState } from 'react';
+import type { PatientSummary, StaffWaitlistResponse } from '@waitlist/shared';
 import { useApi } from '../api/ApiContext';
-import { describeError } from '../api/client';
-import { formatJoinDate, formatSlot } from '../format';
-import { Alert, Button, Card, DataTable, Modal, StatusPill } from '../ui/ui';
+import { ApiError, describeError } from '../api/client';
+import { formatElapsed, formatSlot } from '../format';
+import { Alert, Button, Card, DataTable, PreferencePill, StatusPill } from '../ui/ui';
 
 const POLL_MS = 10_000;
+const CLOCK_TICK_MS = 30_000;
 
-export function StaffView() {
+const PREFERENCE_LABEL = { in_app: 'In-app', telephone: 'Telephone' } as const;
+
+/** The current time, refreshed so "outstanding for N min" keeps moving between data refreshes. */
+function useNow(now: () => number): number {
+  const [current, setCurrent] = useState(now);
+  useEffect(() => {
+    const id = setInterval(() => setCurrent(now()), CLOCK_TICK_MS);
+    return () => clearInterval(id);
+  }, [now]);
+  return current;
+}
+
+type AddMessage = { type: 'ok' | 'err'; text: string };
+
+/**
+ * The staff screen: the waitlist with each patient's contact preference, the slot control that follows
+ * whoever holds the offer, and the panel for adding a patient who called in.
+ *
+ * Removing a patient is not offered in this iteration.
+ *
+ * @param now injectable clock, so the time an offer has been outstanding can be tested
+ */
+export function StaffView({ now = Date.now }: { now?: () => number } = {}) {
   const api = useApi();
   const queryClient = useQueryClient();
+  const currentTime = useNow(now);
 
   const waitlist = useQuery({ queryKey: ['staff', 'waitlist'], queryFn: () => api.staffWaitlist(), refetchInterval: POLL_MS });
   const patients = useQuery({ queryKey: ['patients'], queryFn: () => api.patients() });
 
   const [error, setError] = useState<string | null>(null);
-  const [removing, setRemoving] = useState<StaffEntryView | null>(null);
+  const [addMessage, setAddMessage] = useState<AddMessage | null>(null);
   const [patientId, setPatientId] = useState('');
   const [slotInput, setSlotInput] = useState('');
 
@@ -33,19 +57,28 @@ export function StaffView() {
     refresh();
   };
 
-  const remove = useMutation({
-    mutationFn: (entryId: number) => api.removeEntry(entryId),
-    onSuccess: succeeded,
-    onError: failed,
-    onSettled: () => setRemoving(null),
-  });
   const add = useMutation({
-    mutationFn: (id: number) => api.addPatient(id),
-    onSuccess: () => {
+    mutationFn: (patient: PatientSummary) => api.addPatient(patient.id),
+    onSuccess: (result, patient) => {
+      setError(null);
       setPatientId('');
-      succeeded();
+      setAddMessage(
+        result.created
+          ? { type: 'ok', text: `${patient.name} was added to the waitlist. Contact preference: ${preferenceLabel(patient)}.` }
+          : { type: 'ok', text: `${patient.name} is already on the waitlist.` },
+      );
+      refresh();
     },
-    onError: failed,
+    onError: (err, patient) => {
+      const notRegistered = err instanceof ApiError && err.code === 'patient_not_found';
+      setAddMessage({
+        type: 'err',
+        text: notRegistered
+          ? `${patient.name} is not registered in hospital records. They must register before joining the waitlist.`
+          : describeError(err),
+      });
+      refresh();
+    },
   });
   const release = useMutation({
     mutationFn: (startsAt: string | undefined) => api.release(startsAt),
@@ -55,14 +88,16 @@ export function StaffView() {
     },
     onError: failed,
   });
-  const pass = useMutation({
-    mutationFn: (offerId: number) => api.pass(offerId),
-    onSuccess: succeeded,
-    onError: failed,
-  });
+  const recordAccept = useMutation({ mutationFn: (offerId: number) => api.recordAccept(offerId), onSuccess: succeeded, onError: failed });
+  const recordDecline = useMutation({ mutationFn: (offerId: number) => api.recordDecline(offerId), onSuccess: succeeded, onError: failed });
+  const pass = useMutation({ mutationFn: (offerId: number) => api.pass(offerId), onSuccess: succeeded, onError: failed });
 
   const view = waitlist.data;
+  // Booked and removed entries are not part of the waitlist; the API already leaves them out.
+  const entries = (view?.entries ?? []).filter((e) => e.status === 'waiting' || e.status === 'notified');
   const candidates = (patients.data?.patients ?? []).filter((p) => !p.onWaitlist);
+  const chosen = candidates.find((p) => String(p.id) === patientId);
+  const busy = release.isPending || pass.isPending || recordAccept.isPending || recordDecline.isPending;
 
   return (
     <div>
@@ -72,15 +107,19 @@ export function StaffView() {
       {view && (
         <SlotControl
           view={view}
+          now={currentTime}
           slotInput={slotInput}
           onSlotInput={setSlotInput}
-          busy={release.isPending || pass.isPending}
+          busy={busy}
           onRelease={() => release.mutate(view.release.openSlotStartsAt ? undefined : new Date(slotInput).toISOString())}
+          onRecordAccept={(offerId) => recordAccept.mutate(offerId)}
+          onRecordDecline={(offerId) => recordDecline.mutate(offerId)}
           onPass={(offerId) => pass.mutate(offerId)}
         />
       )}
 
-      <div className="add-row">
+      <div className="add-panel">
+        <span className="add-label">Add a patient on their behalf:</span>
         <select className="field" aria-label="Patient to add" value={patientId} onChange={(e) => setPatientId(e.target.value)}>
           <option value="">Choose a patient</option>
           {candidates.map((p) => (
@@ -89,72 +128,71 @@ export function StaffView() {
             </option>
           ))}
         </select>
-        <Button variant="secondary" disabled={!patientId || add.isPending} onClick={() => add.mutate(Number(patientId))}>
+        <Button small variant="secondary" disabled={!chosen || add.isPending} onClick={() => chosen && add.mutate(chosen)}>
           Add to waitlist
         </Button>
       </div>
+      {addMessage?.type === 'ok' && (
+        <div className="add-msg ok" role="status">
+          {addMessage.text}
+        </div>
+      )}
+      {addMessage?.type === 'err' && <Alert>{addMessage.text}</Alert>}
 
-      {view && view.entries.length === 0 && (
+      {view && entries.length === 0 && (
         <Card tone="empty">
           <p>No patients are currently waiting.</p>
         </Card>
       )}
-      {view && view.entries.length > 0 && (
-        <DataTable headers={['#', 'Patient', 'Status', 'Joined', '']}>
-          {view.entries.map((entry) => (
+      {view && entries.length > 0 && (
+        <DataTable headers={['#', 'Patient', 'Contact preference', 'Status']}>
+          {entries.map((entry) => (
             <tr key={entry.id}>
               <td className="pos-cell">{entry.position}</td>
               <td>{entry.patientName}</td>
               <td>
-                <StatusPill status={entry.status} />
+                <PreferencePill preference={entry.contactPreference} />
               </td>
-              <td>{formatJoinDate(entry.joinedAt)}</td>
               <td>
-                <Button variant="secondary" aria-label={`Remove ${entry.patientName}`} onClick={() => setRemoving(entry)}>
-                  Remove
-                </Button>
+                <StatusPill status={entry.status} />
+                {entry.holdsOffer && view.offer?.requiresCall && <div className="call-flag">Requires a call</div>}
               </td>
             </tr>
           ))}
         </DataTable>
       )}
-      <p className="footnote">Positions recalculate automatically as patients are booked or removed — no one re-numbers the list by hand.</p>
-
-      {removing && (
-        <Modal
-          title={`Remove ${removing.patientName}?`}
-          actions={
-            <>
-              <Button variant="secondary" onClick={() => setRemoving(null)}>
-                Cancel
-              </Button>
-              <Button variant="decline" disabled={remove.isPending} onClick={() => remove.mutate(removing.id)}>
-                Remove
-              </Button>
-            </>
-          }
-        >
-          They will lose their place in line and stop receiving offers.
-        </Modal>
-      )}
+      <p className="footnote">Positions recalculate automatically as patients are booked — no one re-numbers the list by hand.</p>
     </div>
   );
 }
 
-/** Release a slot, or move an unanswered offer on. Shows nothing when neither is possible. */
+function preferenceLabel(patient: PatientSummary): string {
+  return patient.contactPreference ? PREFERENCE_LABEL[patient.contactPreference] : 'Not recorded';
+}
+
+/**
+ * What staff can do about the slot right now: release one, follow up an outstanding offer (recording a
+ * telephone patient's answer or passing it on), or nothing when no patient is eligible.
+ */
 function SlotControl({
   view,
+  now,
   slotInput,
   onSlotInput,
   busy,
   onRelease,
+  onRecordAccept,
+  onRecordDecline,
   onPass,
 }: {
   view: StaffWaitlistResponse;
+  now: number;
   slotInput: string;
   onSlotInput: (value: string) => void;
   busy: boolean;
   onRelease: () => void;
+  onRecordAccept: (offerId: number) => void;
+  onRecordDecline: (offerId: number) => void;
   onPass: (offerId: number) => void;
 }) {
   const { offer, release } = view;
@@ -163,12 +201,29 @@ function SlotControl({
     const holder = view.entries.find((e) => e.id === offer.entryId);
     return (
       <div className="control-row">
-        <div className="control-text">
-          Waiting on <b>{holder?.patientName ?? 'a patient'}</b>'s response to the open slot for {formatSlot(offer.slotStartsAt)}.
+        <div>
+          <div className="control-text">
+            Waiting on <b>{holder?.patientName ?? 'a patient'}</b>'s response{offer.requiresCall ? ' — requires a call' : ''}.
+          </div>
+          <div className="control-sub">
+            Slot: {formatSlot(offer.slotStartsAt)} · Outstanding for {formatElapsed(now - Date.parse(offer.createdAt))}
+          </div>
         </div>
-        <Button variant="secondary" disabled={busy} onClick={() => onPass(offer.id)}>
-          No response — offer to next patient
-        </Button>
+        <div className="control-fields">
+          {offer.requiresCall && (
+            <>
+              <Button small disabled={busy} onClick={() => onRecordAccept(offer.id)}>
+                They accepted
+              </Button>
+              <Button small variant="decline" disabled={busy} onClick={() => onRecordDecline(offer.id)}>
+                They declined
+              </Button>
+            </>
+          )}
+          <Button small variant="secondary" disabled={busy} onClick={() => onPass(offer.id)}>
+            Couldn't reach them — pass to next
+          </Button>
+        </div>
       </div>
     );
   }
@@ -201,11 +256,12 @@ function SlotControl({
     );
   }
 
-  if (release.reason === 'all_waiting_declined' && release.openSlotStartsAt) {
+  if (release.reason === 'all_waiting_declined') {
     return (
       <div className="control-row">
-        <div className="control-text">
-          Every waiting patient has already declined the slot for {formatSlot(release.openSlotStartsAt)}. There is nothing to release.
+        <div>
+          <div className="control-text">No eligible patient remains for this slot.</div>
+          {release.openSlotStartsAt && <div className="control-sub">Slot: {formatSlot(release.openSlotStartsAt)}</div>}
         </div>
       </div>
     );
