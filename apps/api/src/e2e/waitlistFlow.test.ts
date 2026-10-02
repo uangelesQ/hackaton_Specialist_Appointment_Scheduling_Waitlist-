@@ -52,7 +52,7 @@ describe('waitlist end to end (7.1)', () => {
     const before = await get<StaffWaitlistResponse>('/waitlist', staff);
     expect(before.entries.map((e) => [e.position, e.patientName, e.status])).toEqual([
       [1, 'Maria Gómez', 'waiting'],
-      [2, 'Ben Carter', 'waiting'],
+      [2, 'Diego Herrera', 'waiting'],
     ]);
     expect(before.release).toMatchObject({ available: true, openSlotStartsAt: null });
 

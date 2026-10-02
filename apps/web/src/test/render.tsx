@@ -62,7 +62,7 @@ export const patientSession: Session = {
 
 export const staffSession: Session = {
   token: 'staff-token',
-  user: { role: 'staff', id: 1, name: 'Sam Patel' },
+  user: { role: 'staff', id: 1, name: 'Ricardo Salazar' },
   specialist: SPECIALIST,
 };
 

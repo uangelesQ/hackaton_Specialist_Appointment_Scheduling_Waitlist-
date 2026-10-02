@@ -56,13 +56,13 @@ The specialist is **Dr. Elena Ruiz** (Cardiology). Sign in by choosing a name; t
 | Patient | Contact preference | After `npm run seed` |
 |---|---|---|
 | Maria Gómez | In-app | Not on the waitlist |
-| Ben Carter | In-app | Not on the waitlist |
-| Chloe Nguyen | In-app | Not on the waitlist |
+| Diego Herrera | In-app | Not on the waitlist |
+| Valeria Tapia | In-app | Not on the waitlist |
 | Carlos Mendoza | Telephone | Waiting, position 1 |
 | Ana Torres | Not recorded | Waiting, position 2 |
 | Jorge Ramírez | Telephone | Not on the waitlist |
 
-Staff: **Sam Patel** and **Maria Gomez** (the staff member, not the patient Maria Gómez).
+Staff: **Ricardo Salazar** and **Guadalupe Ortega**.
 
 **Sofía Reyes** is deliberately not seeded. She stands for a person who is not registered in hospital records.
 
@@ -89,7 +89,7 @@ After `npm run seed`, `docs/prototype-walkthroughV3.md` maps onto the app like t
 | Walkthrough step | In the app |
 |---|---|
 | 1–2. Maria signs in and joins | Sign in as **Maria Gómez**, press **Join waitlist**. She sees the Waiting status, no position. |
-| 3. Switch to the staff view | Sign out, sign in as **Sam Patel**. The table lists Carlos, Ana, Maria. |
+| 3. Switch to the staff view | Sign out, sign in as **Ricardo Salazar**. The table lists Carlos, Ana, Maria. |
 | 4–5. Add Jorge, who phoned in | In "Add a patient on their behalf", choose **Jorge Ramírez**, press **Add to waitlist**. He appears tagged **Telephone**. |
 | 7. Release the next slot | Enter a date and time and press **Release slot**. Carlos is notified and flagged **Requires a call**. |
 | 8. They declined | Press **They declined** (one click). Carlos goes back to Waiting at position 1 and the offer does **not** move on by itself. |

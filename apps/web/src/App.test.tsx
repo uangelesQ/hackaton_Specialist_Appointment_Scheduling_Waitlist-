@@ -14,9 +14,9 @@ import {
 const USERS = {
   patients: [
     { id: 1, name: 'Maria Gómez' },
-    { id: 2, name: 'Ben Carter' },
+    { id: 2, name: 'Diego Herrera' },
   ],
-  staff: [{ id: 1, name: 'Sam Patel' }],
+  staff: [{ id: 1, name: 'Ricardo Salazar' }],
 };
 
 describe('sign-in and role routing (6.2)', () => {
@@ -35,8 +35,8 @@ describe('sign-in and role routing (6.2)', () => {
 
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
     expect(await screen.findByRole('button', { name: 'Maria Gómez' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Ben Carter' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Sam Patel' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Diego Herrera' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ricardo Salazar' })).toBeInTheDocument();
     expect(screen.queryByText("You're not on the waitlist yet")).not.toBeInTheDocument();
   });
 
@@ -55,7 +55,7 @@ describe('sign-in and role routing (6.2)', () => {
     api.login.mockResolvedValue({ ...staffSession, token: 'abc' });
     renderWithProviders(<App />, { api });
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Sam Patel' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Ricardo Salazar' }));
 
     await waitFor(() => expect(api.login).toHaveBeenCalledWith('staff', 1));
     expect(await screen.findByText('No patients are currently waiting.')).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe('sign-in and role routing (6.2)', () => {
     renderWithProviders(<App />, { api, session: staffSession });
 
     expect(await screen.findByText('No patients are currently waiting.')).toBeInTheDocument();
-    expect(screen.getByText(/Sam Patel/)).toBeInTheDocument();
+    expect(screen.getByText(/Ricardo Salazar/)).toBeInTheDocument();
   });
 
   it('signs out and returns to the sign-in screen', async () => {

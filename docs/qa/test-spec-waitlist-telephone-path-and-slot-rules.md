@@ -78,14 +78,14 @@ Each case still sets up its own state and cleans up.
 | Patient | Contact preference | Note |
 |---|---|---|
 | Maria Gómez | In-app | The patient followed in the walkthrough |
-| Ben Carter | In-app | Extra in-app patient |
-| Chloe Nguyen | In-app | Extra in-app patient |
+| Diego Herrera | In-app | Extra in-app patient |
+| Valeria Tapia | In-app | Extra in-app patient |
 | Carlos Mendoza | Telephone | |
 | Ana Torres | Not recorded | |
 | Jorge Ramírez | Telephone | Registered, not on the waitlist at the start |
 | Sofía Reyes | — | Not registered in hospital records. Never seeded |
 
-- **Staff:** Sam Patel (staff 1). The seed also contains a staff member named Maria Gomez; avoid confusing her with patient Maria Gómez.
+- **Staff:** Ricardo Salazar (staff 1). The seed also contains a second staff member, Guadalupe Ortega (staff 2).
 - **Slots:** SLOT-A = 2026-10-02 10:30 and SLOT-B = 2026-10-02 14:00, both typed by staff in "Slot date and time". The app shows them as `Friday, Oct 2 · 10:30 AM` (2 October 2026 is a Friday; the prototype's "Thursday" is wrong, so compare date and time only).
 - **Notation:** `#n` is the position among active entries in join order. "Active" means `waiting` or `notified`.
 - **Reset:** re-run the seed, or clear the waitlist, offers, slots and audit tables.
@@ -104,7 +104,7 @@ Each case still sets up its own state and cleans up.
   - Carlos Mendoza #1 `waiting`, Ana Torres #2 `waiting`
   - Maria Gómez registered, in-app, no active entry
   - No offer outstanding
-- **Test data:** Maria Gómez (patient session), Sam Patel (staff session)
+- **Test data:** Maria Gómez (patient session), Ricardo Salazar (staff session)
 
 | # | Action | Expected result |
 |---|---|---|
@@ -145,7 +145,7 @@ Each case still sets up its own state and cleans up.
 - **Pre-conditions:**
   - Carlos #1 `waiting`, Ana #2 `waiting`
   - Jorge Ramírez registered, preference Telephone, no active entry
-- **Test data:** Jorge Ramírez, Sam Patel
+- **Test data:** Jorge Ramírez, Ricardo Salazar
 
 | # | Action | Expected result |
 |---|---|---|
@@ -164,7 +164,7 @@ Each case still sets up its own state and cleans up.
 - **Pre-conditions:**
   - Carlos #1 `waiting`; no other entries
   - Sofía Reyes does not exist in the patient records
-- **Test data:** Sofía Reyes (unregistered), Sam Patel (staff token)
+- **Test data:** Sofía Reyes (unregistered), Ricardo Salazar (staff token)
 
 | # | Action | Expected result |
 |---|---|---|
@@ -186,7 +186,7 @@ Each case still sets up its own state and cleans up.
 - **Pre-conditions:**
   - Carlos Mendoza #1 `waiting` (Telephone), Ana Torres #2 `waiting` (Not recorded), Maria Gómez #3 `waiting` (In-app)
   - No offer outstanding; a slot SLOT-A is ready to release
-- **Test data:** Sam Patel
+- **Test data:** Ricardo Salazar
 
 | # | Action | Expected result |
 |---|---|---|
@@ -205,7 +205,7 @@ Each case still sets up its own state and cleans up.
 - **Type / Priority:** Boundary / Medium
 - **Pre-conditions:**
   - No entries on the waitlist; no offer outstanding
-- **Test data:** Sam Patel
+- **Test data:** Ricardo Salazar
 
 | # | Action | Expected result |
 |---|---|---|
@@ -224,7 +224,7 @@ Each case still sets up its own state and cleans up.
 - **Pre-conditions:**
   - Carlos Mendoza #1 `waiting` (Telephone), Ana Torres #2 `waiting` (Not recorded), Maria Gómez #3 `waiting` (In-app)
   - No offer outstanding; no open slot
-- **Test data:** SLOT-A (2026-10-02 10:30), Sam Patel, Maria's session
+- **Test data:** SLOT-A (2026-10-02 10:30), Ricardo Salazar, Maria's session
 
 | # | Action | Expected result |
 |---|---|---|
@@ -243,7 +243,7 @@ Each case still sets up its own state and cleans up.
 - **Type / Priority:** Negative · Concurrency / High
 - **Pre-conditions:**
   - Carlos #1 `notified` holding an offer for SLOT-A; Ana #2 and Maria #3 `waiting`
-- **Test data:** SLOT-A (2026-10-02 10:30), two staff sessions (Sam Patel, and a second staff token)
+- **Test data:** SLOT-A (2026-10-02 10:30), two staff sessions (Ricardo Salazar, and a second staff token)
 
 | # | Action | Expected result |
 |---|---|---|
@@ -261,9 +261,9 @@ Each case still sets up its own state and cleans up.
 - **Traces to:** US-003 AC1, AC4, US-008 AC1 · spec: `contact-preference` / "In-app banner only for in-app patients"; `waitlist-screens` / "Offer banner tells the patient what happens if unanswered"
 - **Type / Priority:** Positive · UI behaviour / High
 - **Pre-conditions:**
-  - Maria Gómez #1 `waiting` (In-app), Ben Carter #2 `waiting` (In-app)
+  - Maria Gómez #1 `waiting` (In-app), Diego Herrera #2 `waiting` (In-app)
   - No offer outstanding
-- **Test data:** SLOT-A (2026-10-02 10:30), Sam Patel, Maria and Ben sessions
+- **Test data:** SLOT-A (2026-10-02 10:30), Ricardo Salazar, Maria and Ben sessions
 
 | # | Action | Expected result |
 |---|---|---|
@@ -283,7 +283,7 @@ Each case still sets up its own state and cleans up.
 - **Type / Priority:** Positive · State transition / High
 - **Pre-conditions:**
   - Maria Gómez #1 `notified` (In-app) holding the offer for SLOT-A
-  - Ben Carter #2 `waiting`
+  - Diego Herrera #2 `waiting`
 - **Test data:** SLOT-A (2026-10-02 10:30), Maria and Sam sessions
 
 | # | Action | Expected result |
@@ -319,7 +319,7 @@ Each case still sets up its own state and cleans up.
 - **Type / Priority:** Positive · State transition / High
 - **Pre-conditions:**
   - Maria Gómez #1 `notified` (In-app) holding the offer for SLOT-A
-  - Ben Carter #2 `waiting` (In-app); Chloe Nguyen #3 `waiting` (In-app)
+  - Diego Herrera #2 `waiting` (In-app); Valeria Tapia #3 `waiting` (In-app)
 - **Test data:** SLOT-A (2026-10-02 10:30)
 
 | # | Action | Expected result |
@@ -342,7 +342,7 @@ Each case still sets up its own state and cleans up.
 - **Pre-conditions:**
   - Carlos Mendoza #1 `waiting` (Telephone), Ana Torres #2 `notified` (Not recorded) holding the offer for SLOT-A, Maria Gómez #3 `waiting` (In-app)
   - Carlos previously declined SLOT-A (recorded by staff)
-- **Test data:** SLOT-A (2026-10-02 10:30), SLOT-B (2026-10-02 14:00), Sam Patel
+- **Test data:** SLOT-A (2026-10-02 10:30), SLOT-B (2026-10-02 14:00), Ricardo Salazar
 
 | # | Action | Expected result |
 |---|---|---|
@@ -360,7 +360,7 @@ Each case still sets up its own state and cleans up.
 - **Type / Priority:** Boundary · State transition / High
 - **Pre-conditions:**
   - Ana Torres #1 `notified` (Not recorded) holding the offer for SLOT-A; she is the only patient on the waitlist
-- **Test data:** SLOT-A (2026-10-02 10:30), SLOT-B (2026-10-02 14:00), Sam Patel
+- **Test data:** SLOT-A (2026-10-02 10:30), SLOT-B (2026-10-02 14:00), Ricardo Salazar
 
 | # | Action | Expected result |
 |---|---|---|
@@ -382,13 +382,13 @@ Each case still sets up its own state and cleans up.
 - **Pre-conditions:**
   - Carlos Mendoza #1 `notified` (Telephone) holding the offer for SLOT-A
   - Ana Torres #2 `waiting` (Not recorded)
-- **Test data:** SLOT-A (2026-10-02 10:30), Sam Patel
+- **Test data:** SLOT-A (2026-10-02 10:30), Ricardo Salazar
 
 | # | Action | Expected result |
 |---|---|---|
 | 1 | Sam selects "They accepted" (one click) | Carlos's entry closes as Booked; no offer is outstanding |
 | 2 | Sam reads the table | Carlos is not listed; Ana is now #1 |
-| 3 | Read the audit record for this action (G-13) | It names Sam Patel, Carlos's entry, SLOT-A and the time, and marks the response as recorded on Carlos's behalf |
+| 3 | Read the audit record for this action (G-13) | It names Ricardo Salazar, Carlos's entry, SLOT-A and the time, and marks the response as recorded on Carlos's behalf |
 | 4 | Sam attempts to release SLOT-A again through the API | The request is rejected: the slot is already booked |
 
 - **Clean-up:** reset the data.
@@ -402,14 +402,14 @@ Each case still sets up its own state and cleans up.
 - **Pre-conditions:**
   - Ana Torres #1 `notified` (Not recorded) holding the offer for SLOT-A
   - Maria Gómez #2 `waiting` (In-app)
-- **Test data:** SLOT-A (2026-10-02 10:30), Sam Patel
+- **Test data:** SLOT-A (2026-10-02 10:30), Ricardo Salazar
 
 | # | Action | Expected result |
 |---|---|---|
 | 1 | Sam selects "They declined" | The offer closes; Ana returns to Waiting at #1; Maria is not notified |
 | 2 | Sam reads the staff control | The slot is back with staff, ready to release |
 | 3 | Sam releases SLOT-A again | Maria is offered the slot; Ana is skipped |
-| 4 | Read the audit records | Ana's decline is marked as recorded by Sam Patel on her behalf |
+| 4 | Read the audit records | Ana's decline is marked as recorded by Ricardo Salazar on her behalf |
 
 - **Clean-up:** reset the data.
 - **Status:** Draft
@@ -446,7 +446,7 @@ Each case still sets up its own state and cleans up.
 - **Type / Priority:** Negative · Concurrency / High
 - **Pre-conditions:**
   - Maria Gómez #1 `notified` (In-app) holding the offer for SLOT-A, not yet viewed
-  - Ben Carter #2 `waiting` (In-app)
+  - Diego Herrera #2 `waiting` (In-app)
 - **Test data:** SLOT-A (2026-10-02 10:30), Sam and Maria sessions
 
 | # | Action | Expected result |
@@ -468,8 +468,8 @@ Each case still sets up its own state and cleans up.
 - **Type / Priority:** Negative · Business-rule / High
 - **Pre-conditions:**
   - SLOT-A (2026-10-02 10:30) is booked for Maria Gómez
-  - Ben Carter #1 `waiting`; no offer outstanding
-- **Test data:** SLOT-A (2026-10-02 10:30), SLOT-B (2026-10-02 14:00), Sam Patel
+  - Diego Herrera #1 `waiting`; no offer outstanding
+- **Test data:** SLOT-A (2026-10-02 10:30), SLOT-B (2026-10-02 14:00), Ricardo Salazar
 
 | # | Action | Expected result |
 |---|---|---|
@@ -492,7 +492,7 @@ Each case still sets up its own state and cleans up.
 - **Type / Priority:** Negative · Permission / High
 - **Pre-conditions:**
   - Maria Gómez #1 `notified` (In-app) holding the offer for SLOT-A
-  - Ben Carter #2 `waiting` (In-app)
+  - Diego Herrera #2 `waiting` (In-app)
 - **Test data:** Ben's token, an unauthenticated request, Maria's offer id
 
 | # | Action | Expected result |

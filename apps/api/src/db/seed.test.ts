@@ -36,8 +36,8 @@ describe('seed', () => {
       const patients = await db('patients').orderBy('id').select('id', 'full_name', 'contact_preference');
       expect(patients).toEqual([
         { id: 1, full_name: 'Maria Gómez', contact_preference: 'in_app' },
-        { id: 2, full_name: 'Ben Carter', contact_preference: 'in_app' },
-        { id: 3, full_name: 'Chloe Nguyen', contact_preference: 'in_app' },
+        { id: 2, full_name: 'Diego Herrera', contact_preference: 'in_app' },
+        { id: 3, full_name: 'Valeria Tapia', contact_preference: 'in_app' },
         { id: 4, full_name: 'Carlos Mendoza', contact_preference: 'telephone' },
         { id: 5, full_name: 'Ana Torres', contact_preference: null },
         { id: 6, full_name: 'Jorge Ramírez', contact_preference: 'telephone' },

@@ -19,8 +19,8 @@ describe('demo login and patient lookup', () => {
       expect(res.body.patients).toHaveLength(6);
       expect(res.body.patients[0]).toEqual({ id: 1, name: 'Maria Gómez' });
       expect(res.body.staff).toEqual([
-        { id: 1, name: 'Sam Patel' },
-        { id: 2, name: 'Maria Gomez' },
+        { id: 1, name: 'Ricardo Salazar' },
+        { id: 2, name: 'Guadalupe Ortega' },
       ]);
     });
 
@@ -31,7 +31,7 @@ describe('demo login and patient lookup', () => {
 
       expect(login.status).toBe(200);
       expect(login.body).toMatchObject({
-        user: { role: 'patient', id: 2, name: 'Ben Carter' },
+        user: { role: 'patient', id: 2, name: 'Diego Herrera' },
         specialist: { name: 'Dr. Elena Ruiz', clinic: 'Cardiology' },
       });
       const me = await request(t.app).get('/me/waitlist').set('Authorization', `Bearer ${login.body.token}`);
@@ -43,7 +43,7 @@ describe('demo login and patient lookup', () => {
 
       const login = await request(t.app).post('/demo/login').send({ role: 'staff', id: 1 });
 
-      expect(login.body.user).toEqual({ role: 'staff', id: 1, name: 'Sam Patel' });
+      expect(login.body.user).toEqual({ role: 'staff', id: 1, name: 'Ricardo Salazar' });
       const header = `Bearer ${login.body.token}`;
       expect((await request(t.app).get('/waitlist').set('Authorization', header)).status).toBe(200);
       expect((await request(t.app).get('/me/waitlist').set('Authorization', header)).status).toBe(403);
@@ -85,7 +85,7 @@ describe('demo login and patient lookup', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.patients).toHaveLength(6);
-      expect(res.body.patients[1]).toEqual({ id: 2, name: 'Ben Carter', onWaitlist: true, contactPreference: 'in_app' });
+      expect(res.body.patients[1]).toEqual({ id: 2, name: 'Diego Herrera', onWaitlist: true, contactPreference: 'in_app' });
       expect(res.body.patients[0]).toEqual({ id: 1, name: 'Maria Gómez', onWaitlist: false, contactPreference: 'in_app' });
     });
 
@@ -96,8 +96,8 @@ describe('demo login and patient lookup', () => {
 
       expect(res.body.patients.map((p: { name: string; contactPreference: string | null }) => [p.name, p.contactPreference])).toEqual([
         ['Maria Gómez', 'in_app'],
-        ['Ben Carter', 'in_app'],
-        ['Chloe Nguyen', 'in_app'],
+        ['Diego Herrera', 'in_app'],
+        ['Valeria Tapia', 'in_app'],
         ['Carlos Mendoza', 'telephone'],
         ['Ana Torres', null],
         ['Jorge Ramírez', 'telephone'],

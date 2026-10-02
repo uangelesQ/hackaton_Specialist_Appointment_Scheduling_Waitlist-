@@ -190,7 +190,7 @@ All captures are from the running current app on 2026-10-01 using the Playwright
 | Page object | Locator | State captured | Matches | Strategy | Result |
 |---|---|---|---|---|---|
 | signInPO | user button `Ana Torres` | signed out | 1 | role button, name | verified |
-| signInPO | user button `Sam Patel` | signed out | 1 | role button, name | verified |
+| signInPO | user button `Ricardo Salazar` | signed out | 1 | role button, name | verified |
 | appShellPO | `Signed in as Ana Torres (patient)` | patient signed in | 1 | text | verified |
 | joinWaitlistPO | not-joined heading | patient, not on list | 1 | role heading, name | verified |
 | joinWaitlistPO | Join waitlist button | patient, not on list | 1 | role button, name | verified |
@@ -199,7 +199,7 @@ All captures are from the running current app on 2026-10-01 using the Playwright
 | addPatientPO | Add to waitlist | staff, any state | 1 | role button, name | verified |
 | viewWaitlistPO | empty message | staff, empty list | 1 | text | verified |
 | viewWaitlistPO | row `Ana Torres` | staff, two waiting | 1 | role row, name | verified |
-| viewWaitlistPO | row `Ben Carter` | staff, two waiting | 1 | role row, name | verified |
+| viewWaitlistPO | row `Diego Herrera` | staff, two waiting | 1 | role row, name | verified |
 | viewWaitlistPO | `Notified` in Ana's row | staff, offer outstanding | 1 | within row, text | verified |
 | viewWaitlistPO | Remove button in Ana's row | staff, two waiting | 1 | within row, role button, name | verified (absent after change) |
 | releaseSlotPO | slot input | staff, no offer, no returned slot | 1 | label | verified |
