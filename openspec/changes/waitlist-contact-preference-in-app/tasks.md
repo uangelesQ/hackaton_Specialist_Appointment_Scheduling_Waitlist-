@@ -27,9 +27,9 @@
 
 ## 5. Demo registration API (demo-registration)
 
-- [ ] 5.1 Write failing tests, then add `POST /demo/register` to the demo router: trims the name, requires a non-empty name and a valid preference (400 otherwise), inserts the patient and a first-choice audit row (actor the new patient) in one transaction, and returns a `LoginResponse`. Verify: the returned token works on `GET /me/waitlist`; a patient registered with `in_app` can join with no choice asked; missing name, whitespace-only name and missing or invalid preference create nothing. *(A person can register in the demonstration environment; Registration needs a name and a preference)*
-- [ ] 5.2 Map a duplicate to 409 `name_already_registered`, including different letter case and surrounding spaces, and map a unique-index violation from a simultaneous registration the same way. Verify with tests for the duplicate, the case variant, and two concurrent registrations producing exactly one patient. *(A name already in use is refused)*
-- [ ] 5.3 Verify the endpoint does not exist when demo login is off: build the app with `demoLogin: false` and assert `POST /demo/register` returns 404 and no patient is created. *(Registration is unavailable outside the demonstration environment)*
+- [x] 5.1 Write failing tests, then add `POST /demo/register` to the demo router: trims the name, requires a non-empty name and a valid preference (400 otherwise), inserts the patient and a first-choice audit row (actor the new patient) in one transaction, and returns a `LoginResponse`. Verify: the returned token works on `GET /me/waitlist`; a patient registered with `in_app` can join with no choice asked; missing name, whitespace-only name and missing or invalid preference create nothing. *(A person can register in the demonstration environment; Registration needs a name and a preference)*
+- [x] 5.2 Map a duplicate to 409 `name_already_registered`, including different letter case and surrounding spaces, and map a unique-index violation from a simultaneous registration the same way. Verify with tests for the duplicate, the case variant, and two concurrent registrations producing exactly one patient. *(A name already in use is refused)*
+- [x] 5.3 Verify the endpoint does not exist when demo login is off: build the app with `demoLogin: false` and assert `POST /demo/register` returns 404 and no patient is created. *(Registration is unavailable outside the demonstration environment)*
 
 ## 6. Shared types and web client (waitlist-screens)
 

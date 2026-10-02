@@ -23,7 +23,7 @@ export function createApp({ db, jwtSecret, clock, demoLogin = false }: AppDeps) 
   app.use(express.json());
 
   // Public routes must be mounted above `authenticate`.
-  if (demoLogin) app.use('/demo', demoRouter(db, jwtSecret));
+  if (demoLogin) app.use('/demo', demoRouter(db, jwtSecret, clock));
 
   // Every route below requires a valid token.
   app.use(authenticate(jwtSecret));

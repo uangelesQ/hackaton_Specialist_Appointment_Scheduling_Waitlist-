@@ -59,6 +59,12 @@ export function patientRepository(db: Knex | Knex.Transaction) {
       return previous;
     },
 
+    /** Adds a patient with no recorded preference and returns it. Names are unique ignoring ASCII case. */
+    async create(fullName: string): Promise<PatientRecord> {
+      const [id] = await db('patients').insert({ full_name: fullName });
+      return { id: id as number, fullName, contactPreference: null };
+    },
+
     /** Patient records keyed by id. Unknown ids are simply absent. */
     async byIds(ids: readonly number[]): Promise<Map<number, PatientRecord>> {
       const rows: PatientRow[] = await db('patients').whereIn('id', [...ids]);
