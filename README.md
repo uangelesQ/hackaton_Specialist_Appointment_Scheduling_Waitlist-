@@ -2,20 +2,21 @@
 
 A digital waitlist for one high-demand specialist. Patients join the list and are told in the app when a slot opens. Patients who cannot use the app are reached by a staff call, and staff record their answer, so everyone is on the same waitlist.
 
-This is the product in `docs/PS-001-Specialist-Waitlist-v2.4.md` with the screens of `docs/waitlist-prototypeV3.html`. It was built in two steps, and both are in `openspec/`:
+This is the product in `docs/PS-001-Specialist-Waitlist-v2.5.md` (a **Draft**, see "Assumptions" below) with the screens of `docs/waitlist-prototypeV3.html` extended for the new behaviour. It was built in three steps, and all are in `openspec/`:
 
-- `openspec/specs/` holds the behaviour of the first step (join, view, release, accept, decline, pass-on). Its proposal and tasks are in `openspec/changes/archive/`.
-- `openspec/changes/waitlist-telephone-path-and-slot-rules/` is the current step: contact preference, the telephone path, slot targeting rules and the V3 screens.
+- `openspec/specs/` holds the behaviour of the first two steps (join, view, release, accept, decline, pass-on, the telephone path and slot rules). Their proposals and tasks are in `openspec/changes/archive/`.
+- `openspec/changes/waitlist-contact-preference-in-app/` is the current step: patients set and change their own contact preference, a patient with none must choose before joining, and a demo registration step on the sign-in screen. It is built and tested but not yet archived.
 
 ## What it does
 
 - A patient joins the waitlist and sees a **status** (Joined, Waiting, Notified, Booked), not a queue position. The patient screen has no leave control.
-- Every patient has a **contact preference** that decides how they are reached: `in_app`, `telephone`, or not recorded. It is read from the patient record and cannot be changed here.
+- Every patient has a **contact preference** that decides how they are reached: `in_app`, `telephone`, or not recorded. **Patients choose and change their own** in the app, at any time they are signed in. A patient with none must choose before joining, and staff record one only when adding a caller who has none.
 - Staff see the whole list with each patient's contact preference, add a patient who phoned in, and **release** an open slot. The slot goes to the patient who is **next in line**.
 - If that patient is **in-app**, they get a banner and can **Accept** (after a confirm step) or **Decline**.
 - If they are **telephone or not recorded**, the staff screen flags the offer **Requires a call**. Staff phone them and press **They accepted** or **They declined**. If they cannot be reached, staff press **Couldn't reach them — pass to next**.
 - Declining or being passed over keeps the patient's place. The next patient is **not** notified automatically, and nobody is offered a slot they declined or were passed over for. A booked slot cannot be released again.
-- Every join, release, accept, decline, pass-on and staff-recorded response records who did it and when.
+- A change of preference **while holding an offer** takes effect at once: the offer stays outstanding and follows the new channel (the banner appears or disappears, the staff call flag follows).
+- Every join, release, accept, decline, pass-on, staff-recorded response and preference change records who did it and when (a preference change also records the previous and new value; no screen shows that history).
 - The API still has position, leave and remove. Only their screens are hidden in this step, because the product spec defers them.
 
 ## Requirements
@@ -70,7 +71,12 @@ These are made-up demo records. Sign-in is a **demo stand-in** for a real identi
 
 ## Contact preference and the telephone path
 
-The preference is captured by hospital registration, outside this app. The app only reads it, and no screen or route changes it. A patient with **no recorded preference is treated as telephone** everywhere.
+The preference is one value per patient. Hospital registration may also write it (outside this app); where both write it, the most recent write applies. In this app:
+
+- **A patient** sets or changes their own on the "How we contact you" card, whenever they are signed in, even with a booked entry or no entry. Saving never creates or moves an entry.
+- **Joining** with no recorded preference first asks the patient to choose in-app or telephone, then saves it and joins. If the join then fails, the saved choice is kept and they are not asked again.
+- **Staff** record a preference only when adding a caller who has none (a "Contact preference" choice appears in the add panel). It is saved together with the entry. Staff cannot change a preference that is already recorded.
+- A patient **already waiting with no preference** (an entry from before a choice was required) keeps their place and is **treated as telephone** until they choose one.
 
 Each patient has exactly one way to answer an offer:
 
@@ -80,7 +86,7 @@ Each patient has exactly one way to answer an offer:
 | Telephone | No. A notice says the team will contact them | Staff, after a call | "Requires a call", They accepted, They declined, pass to next |
 | Not recorded | Same as telephone | Staff, after a call | Same as telephone |
 
-An in-app answer from a telephone patient is refused, and staff cannot record an answer for an in-app patient. A staff-recorded response has the same effect as the patient's own and is audited as entered by staff. The first action on an offer wins: anything that arrives after is told the offer is no longer available.
+The channel is read from the patient record on every view and every action, so it is judged at the moment of the action: a patient who switches to telephone and then confirms an accept is refused, and staff recording for a patient who has just switched to in-app is refused, in both cases with the offer left outstanding. An in-app answer from a telephone patient is refused, and staff cannot record an answer for an in-app patient. A staff-recorded response has the same effect as the patient's own and is audited as entered by staff. The first action on an offer wins: anything that arrives after is told the offer is no longer available.
 
 ## Try it: the V3 demo script
 
@@ -107,6 +113,13 @@ After `npm run seed`, `docs/prototype-walkthroughV3.md` maps onto the app like t
 - **Booked rows in the staff table.** The prototype keeps Maria listed as Booked. The product spec says closed entries are not listed, so she disappears.
 - **The "(you)" label.** Prototype-only; not built.
 
+## Try it: choosing a preference and registering
+
+- **Register (demo).** On the sign-in screen, under the seeded names, enter a name, choose In-app or Telephone and press **Register**. A patient is created and you are signed in as them. A name already in use (any letter case) is refused with "you can sign in as that patient instead". A person registered this way is never asked to choose again when joining.
+- **Choose before joining.** Ana Torres is the only seeded patient with no preference. Start over without `npm run seed` (delete `apps/api/data/waitlist.db` and run only `npm run dev -w @waitlist/api`, which seeds the people but leaves the waitlist empty), sign in as **Ana Torres** and press **Join waitlist**. She is asked to choose In-app or Telephone first, and is not asked again afterwards.
+- **Add a caller who has none.** On the same empty-waitlist database, sign in as staff and pick **Ana Torres** in the add panel. A "Contact preference" choice appears and **Add to waitlist** stays disabled until one is chosen. (After `npm run seed` she is already waiting, as a patient from before the choice was required.)
+- **Change during an offer.** Release a slot to Maria, then sign in as Maria in another window and switch to Telephone on the "How we contact you" card. Her banner disappears and the staff screen shows **Requires a call**. Switch back and the banner returns.
+
 ## Try it: the unreachable and booked-slot rules
 
 - Press **Release slot**, then pass the offer on to everyone until nobody is left. The screen says **No eligible patient remains for this slot.** and offers no release.
@@ -119,23 +132,25 @@ Set these as environment variables for the API.
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `DEMO_LOGIN` | off | `true` enables passwordless sign-in and seeds the sample people on start |
+| `DEMO_LOGIN` | off | `true` enables passwordless sign-in, the demo registration step, and seeds the sample people on start |
 | `JWT_SECRET` | none | Signing secret. Required unless `DEMO_LOGIN=true` (a built-in demo secret is used then) |
 | `PORT` | `3001` | API port |
 | `DATABASE_FILE` | `data/waitlist.db` | SQLite file, relative to `apps/api` |
 
 ## API
 
-All routes need a bearer token except the two `/demo` routes.
+All routes need a bearer token except the `/demo` routes.
 
 | Route | Who | Does |
 |---|---|---|
 | `POST /demo/login`, `GET /demo/users` | anyone (demo only) | Sign in as a seeded user; list them |
-| `POST /waitlist` | patient | Join. Joining again returns the existing entry |
-| `GET /me/waitlist` | patient | Own status, offer banner data (in-app holders only), `holdsOffer`, `responseChannel`, and position |
+| `POST /demo/register` | anyone (demo only) | Create a patient from `{ name, contactPreference }` and sign them in. 409 `name_already_registered` for a name in use; 400 `name_required` or `preference_required` |
+| `POST /waitlist` | patient | Join. Joining again returns the existing entry. 409 `preference_required` when the patient has no recorded preference |
+| `PUT /me/contact-preference` | patient | Set or change own preference (`{ contactPreference }`); audited with the previous and new value |
+| `GET /me/waitlist` | patient | Own `contactPreference`, status, offer banner data (in-app holders only), `holdsOffer`, `responseChannel`, and position |
 | `DELETE /waitlist/:entryId` | owner or staff | Leave / remove (no screen uses it in this step) |
 | `GET /waitlist` | staff | Active entries with contact preference, the outstanding offer (`requiresCall`, `createdAt`), and whether release is possible |
-| `POST /waitlist/patients/:patientId` | staff | Add a patient on their behalf |
+| `POST /waitlist/patients/:patientId` | staff | Add a patient on their behalf. Send `{ contactPreference }` only for a caller who has none (409 `preference_required` without it, 409 `preference_already_recorded` if they have one) |
 | `GET /patients` | staff | Registered patients with their contact preference, for the add form |
 | `POST /offers` | staff | Release a slot (`startsAt`, unless a returned slot is waiting) |
 | `POST /offers/:id/accept`, `.../decline` | the offer holder, in-app only | Answer an offer in the app |
@@ -165,6 +180,15 @@ Caveats: the preview server uses plain HTTP, so a real HTTPS connection adds two
 
 The product spec left these open, so the plan chose a behaviour. Please confirm or change each.
 
+**Contact preference in the app (PS-001 v2.5, still a Draft)**
+- **Hospital operations have not confirmed** that patients may write the preference in the app, which reverses the earlier read-only position, or that the most recent write wins where registration and this app both write it. If they decline, this step is reverted rather than reworked. Nothing here passes a change back to hospital registration.
+- **Staff get the telephone number from hospital records.** No number is held or captured here.
+- **Staff cannot change a recorded preference.** Asking to is refused so the staff member is told, rather than ignored.
+- **Saving the value a patient already has** changes nothing and writes no audit row.
+- **Option wording** ("offers appear in the app", "staff will call you") and the failure messages are pending UX. There is no prototype V4.
+- **"At once"** relies on the existing 10-second polling.
+- **Demo registration** is not Product scope (PS Appendix A). A name is its uniqueness key, compared ignoring letter case; that is not a production identity rule.
+
 **Contact preference and responding**
 - **Not recorded is treated as telephone.**
 - **One response channel per patient.** An in-app answer from a telephone or not-recorded patient is refused, and staff cannot record for an in-app patient. This is this plan's reading of the spec, not a stated decision.
@@ -189,7 +213,8 @@ The product spec left these open, so the plan chose a behaviour. Please confirm 
 
 - One specialist, one clinic.
 - In-app only: no email or SMS, no timer, no automatic pass-on, and the phone call itself happens outside the app.
-- The audit trail is stored but there is no screen or endpoint to read it.
+- The audit trail is stored but there is no screen or endpoint to read it. That includes the history of preference changes.
+- Staff correcting a recorded preference, capturing a telephone number, contact options other than in-app and telephone, and passing a changed preference back to hospital registration are deferred (PS v2.5 Section 10).
 - Patient position, leaving the waitlist and staff removal are not on any screen in this step (the API has them).
 - SQLite suits the MVP, not horizontal scaling. The repository layer is where a production database would plug in.
 - Rescheduling and cancelling a booking are out of scope. The booked screen says to contact the office.
