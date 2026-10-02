@@ -46,6 +46,9 @@ describe('api client', () => {
 
     await client.join();
     await client.addPatient(4);
+    await client.addPatient(5, 'telephone');
+    await client.setContactPreference('in_app');
+    await client.register('Lucía Fernández', 'telephone');
     await client.removeEntry(7);
     await client.accept(3);
     await client.decline(3);
@@ -58,6 +61,9 @@ describe('api client', () => {
     expect(fetchMock.mock.calls.map(([url, init]) => `${(init as RequestInit).method} ${url}`)).toEqual([
       'POST /api/waitlist',
       'POST /api/waitlist/patients/4',
+      'POST /api/waitlist/patients/5',
+      'PUT /api/me/contact-preference',
+      'POST /api/demo/register',
       'DELETE /api/waitlist/7',
       'POST /api/offers/3/accept',
       'POST /api/offers/3/decline',
@@ -67,6 +73,32 @@ describe('api client', () => {
       'GET /api/waitlist',
       'GET /api/patients',
     ]);
+  });
+
+  it('sends the preference only when one is given', async () => {
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse(200, {})));
+    const client = createApiClient('/api', () => 'tok', vi.fn(), fetchMock);
+
+    await client.addPatient(4);
+    await client.addPatient(5, 'telephone');
+    await client.setContactPreference('in_app');
+    await client.register('Lucía Fernández', 'telephone');
+
+    const bodies = fetchMock.mock.calls.map(([, init]) => (init as RequestInit).body);
+    expect(bodies[0]).toBeUndefined();
+    expect(JSON.parse(bodies[1] as string)).toEqual({ contactPreference: 'telephone' });
+    expect(JSON.parse(bodies[2] as string)).toEqual({ contactPreference: 'in_app' });
+    expect(JSON.parse(bodies[3] as string)).toEqual({ name: 'Lucía Fernández', contactPreference: 'telephone' });
+  });
+
+  it('does not treat a failed registration as an expired session', async () => {
+    const onUnauthorized = vi.fn();
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(409, { error: 'name_already_registered' }));
+    const client = createApiClient('/api', () => null, onUnauthorized, fetchMock);
+
+    await expect(client.register('Maria Gómez', 'in_app')).rejects.toMatchObject({ status: 409, code: 'name_already_registered' });
+
+    expect(onUnauthorized).not.toHaveBeenCalled();
   });
 
   it('throws an ApiError carrying the status and code', async () => {
@@ -112,12 +144,25 @@ describe('describeError', () => {
     ['offer_outstanding', /already waiting/i],
     ['no_eligible_patient', /no eligible patient/i],
     ['entry_not_active', /no longer on the waitlist/i],
+    ['preference_required', /choose in-app or telephone/i],
+    ['preference_already_recorded', /already has a contact preference/i],
+    ['name_already_registered', /already registered.*sign in as that patient/i],
+    ['name_required', /enter a name/i],
   ])('explains %s in words a user can act on', (code, expected) => {
     expect(message(code)).toMatch(expected);
   });
 
   it('never shows the raw error code', () => {
-    for (const code of ['response_by_staff', 'patient_responds_in_app', 'slot_already_booked', 'patient_not_found']) {
+    for (const code of [
+      'response_by_staff',
+      'patient_responds_in_app',
+      'slot_already_booked',
+      'patient_not_found',
+      'preference_required',
+      'preference_already_recorded',
+      'name_already_registered',
+      'name_required',
+    ]) {
       expect(message(code)).not.toContain('_');
     }
   });

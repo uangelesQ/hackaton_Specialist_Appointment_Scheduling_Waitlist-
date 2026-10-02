@@ -12,6 +12,8 @@ export type FakeApi = { [K in keyof ApiClient]: Mock<ApiClient[K]> };
 const METHODS: (keyof ApiClient)[] = [
   'demoUsers',
   'login',
+  'register',
+  'setContactPreference',
   'myWaitlist',
   'join',
   'removeEntry',

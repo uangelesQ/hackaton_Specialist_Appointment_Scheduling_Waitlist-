@@ -57,6 +57,21 @@ export interface SetContactPreferenceResponse {
   contactPreference: ContactPreference;
 }
 
+/** Request bodies. Staff send a preference only when adding a caller who has none. */
+export interface SetContactPreferenceRequest {
+  contactPreference: ContactPreference;
+}
+
+export interface AddPatientRequest {
+  contactPreference?: ContactPreference;
+}
+
+/** Demo registration only. */
+export interface RegisterRequest {
+  name: string;
+  contactPreference: ContactPreference;
+}
+
 export interface StaffEntryView {
   id: number;
   patientId: number;

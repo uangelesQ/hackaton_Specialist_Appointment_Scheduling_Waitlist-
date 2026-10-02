@@ -33,7 +33,7 @@
 
 ## 6. Shared types and web client (waitlist-screens)
 
-- [ ] 6.1 Add `SetContactPreferenceResponse`, `RegisterRequest` and the optional preference on the add request to `packages/shared`, then add `setContactPreference`, `register` and the optional `addPatient` argument to the web `ApiClient` and `createApiClient`, and add `describeError` messages for `preference_required`, `preference_already_recorded` and `name_already_registered`. Verify `client.test.ts` cases for each new call (method, path, body) and each message, and `npm run build` type-checks both apps. *(A patient sees and changes their contact preference)*
+- [x] 6.1 Add `SetContactPreferenceResponse`, `RegisterRequest` and the optional preference on the add request to `packages/shared`, then add `setContactPreference`, `register` and the optional `addPatient` argument to the web `ApiClient` and `createApiClient`, and add `describeError` messages for `preference_required`, `preference_already_recorded` and `name_already_registered`. Verify `client.test.ts` cases for each new call (method, path, body) and each message, and `npm run build` type-checks both apps. *(A patient sees and changes their contact preference)*
 
 ## 7. Patient screen (waitlist-screens)
 

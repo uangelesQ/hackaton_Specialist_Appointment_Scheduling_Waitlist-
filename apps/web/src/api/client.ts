@@ -1,5 +1,7 @@
 import type {
   AcceptResponse,
+  AddPatientRequest,
+  ContactPreference,
   DeclineResponse,
   DemoUsersResponse,
   JoinResponse,
@@ -8,8 +10,11 @@ import type {
   PassOnResponse,
   PatientsResponse,
   ReleaseResponse,
+  RegisterRequest,
   RemoveResponse,
   Role,
+  SetContactPreferenceRequest,
+  SetContactPreferenceResponse,
   StaffWaitlistResponse,
 } from '@waitlist/shared';
 
@@ -26,6 +31,10 @@ export class ApiError extends Error {
 export interface ApiClient {
   demoUsers(): Promise<DemoUsersResponse>;
   login(role: Role, id: number): Promise<LoginResponse>;
+  /** Demo only: creates a patient with a chosen preference and signs them in. */
+  register(name: string, contactPreference: ContactPreference): Promise<LoginResponse>;
+  /** The signed-in patient sets or changes their own contact preference. */
+  setContactPreference(contactPreference: ContactPreference): Promise<SetContactPreferenceResponse>;
   myWaitlist(): Promise<MyWaitlistResponse>;
   join(): Promise<JoinResponse>;
   removeEntry(entryId: number): Promise<RemoveResponse>;
@@ -36,7 +45,8 @@ export interface ApiClient {
   recordDecline(offerId: number): Promise<DeclineResponse>;
   staffWaitlist(): Promise<StaffWaitlistResponse>;
   patients(): Promise<PatientsResponse>;
-  addPatient(patientId: number): Promise<JoinResponse>;
+  /** Staff add a caller; `contactPreference` is sent only when the caller has none recorded. */
+  addPatient(patientId: number, contactPreference?: ContactPreference): Promise<JoinResponse>;
   release(startsAt?: string): Promise<ReleaseResponse>;
   pass(offerId: number): Promise<PassOnResponse>;
 }
@@ -75,6 +85,9 @@ export function createApiClient(
   return {
     demoUsers: () => request('GET', '/demo/users'),
     login: (role, id) => request('POST', '/demo/login', { role, id }),
+    register: (name, contactPreference) => request('POST', '/demo/register', { name, contactPreference } satisfies RegisterRequest),
+    setContactPreference: (contactPreference) =>
+      request('PUT', '/me/contact-preference', { contactPreference } satisfies SetContactPreferenceRequest),
     myWaitlist: () => request('GET', '/me/waitlist'),
     join: () => request('POST', '/waitlist'),
     removeEntry: (entryId) => request('DELETE', `/waitlist/${entryId}`),
@@ -84,7 +97,12 @@ export function createApiClient(
     recordDecline: (offerId) => request('POST', `/offers/${offerId}/record-decline`),
     staffWaitlist: () => request('GET', '/waitlist'),
     patients: () => request('GET', '/patients'),
-    addPatient: (patientId) => request('POST', `/waitlist/patients/${patientId}`),
+    addPatient: (patientId, contactPreference) =>
+      request(
+        'POST',
+        `/waitlist/patients/${patientId}`,
+        contactPreference ? ({ contactPreference } satisfies AddPatientRequest) : undefined,
+      ),
     release: (startsAt) => request('POST', '/offers', startsAt ? { startsAt } : {}),
     pass: (offerId) => request('POST', `/offers/${offerId}/pass`),
   };
@@ -110,6 +128,14 @@ export function describeError(err: unknown): string {
       return 'This patient answers in the app, so staff cannot record a response for them.';
     case 'slot_already_booked':
       return 'That slot is already booked. Choose a different date and time.';
+    case 'preference_required':
+      return 'Choose in-app or telephone as the contact preference first.';
+    case 'preference_already_recorded':
+      return 'This patient already has a contact preference, and only the patient can change it.';
+    case 'name_already_registered':
+      return 'That name is already registered. You can sign in as that patient instead.';
+    case 'name_required':
+      return 'Enter a name to register.';
     case 'patient_not_found':
       return 'That person is not registered in hospital records. They must register before joining the waitlist.';
     case 'forbidden':
