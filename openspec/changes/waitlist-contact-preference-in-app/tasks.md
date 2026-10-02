@@ -43,7 +43,7 @@
 
 ## 8. Staff add panel (waitlist-screens)
 
-- [ ] 8.1 Write failing tests, then update `StaffView`: when the chosen caller has no preference, show a "Contact preference" select with in-app and telephone and keep "Add to waitlist" disabled until one is chosen; send it with the add; show the preference in the confirmation; show nothing extra for a caller who has one; show the `preference_required` and `preference_already_recorded` messages if the API refuses. Verify the tests pass. *(Staff add outcomes are explained)*
+- [x] 8.1 Write failing tests, then update `StaffView`: when the chosen caller has no preference, show a "Contact preference" select with in-app and telephone and keep "Add to waitlist" disabled until one is chosen; send it with the add; show the preference in the confirmation; show nothing extra for a caller who has one; show the `preference_required` and `preference_already_recorded` messages if the API refuses. Verify the tests pass. *(Staff add outcomes are explained)*
 
 ## 9. Sign-in registration form (demo-registration)
 

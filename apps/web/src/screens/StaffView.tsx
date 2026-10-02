@@ -1,15 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import type { PatientSummary, StaffWaitlistResponse } from '@waitlist/shared';
+import type { ContactPreference, PatientSummary, StaffWaitlistResponse } from '@waitlist/shared';
 import { useApi } from '../api/ApiContext';
 import { ApiError, describeError } from '../api/client';
 import { formatElapsed, formatSlot } from '../format';
-import { Alert, Button, Card, DataTable, PreferencePill, StatusPill } from '../ui/ui';
+import { Alert, Button, Card, DataTable, PREFERENCE_LABEL, PreferencePill, StatusPill } from '../ui/ui';
 
 const POLL_MS = 10_000;
 const CLOCK_TICK_MS = 30_000;
-
-const PREFERENCE_LABEL = { in_app: 'In-app', telephone: 'Telephone' } as const;
 
 /** The current time, refreshed so "outstanding for N min" keeps moving between data refreshes. */
 function useNow(now: () => number): number {
@@ -42,6 +40,8 @@ export function StaffView({ now = Date.now }: { now?: () => number } = {}) {
   const [error, setError] = useState<string | null>(null);
   const [addMessage, setAddMessage] = useState<AddMessage | null>(null);
   const [patientId, setPatientId] = useState('');
+  // The choice staff record for a caller who has none; always forgotten when another caller is picked.
+  const [recorded, setRecorded] = useState<ContactPreference | ''>('');
   const [slotInput, setSlotInput] = useState('');
 
   const refresh = () => {
@@ -58,18 +58,24 @@ export function StaffView({ now = Date.now }: { now?: () => number } = {}) {
   };
 
   const add = useMutation({
-    mutationFn: (patient: PatientSummary) => api.addPatient(patient.id),
-    onSuccess: (result, patient) => {
+    // A preference is sent only for a caller who has none recorded (US-006, BR-016).
+    mutationFn: ({ patient, preference }: { patient: PatientSummary; preference?: ContactPreference }) =>
+      preference ? api.addPatient(patient.id, preference) : api.addPatient(patient.id),
+    onSuccess: (result, { patient, preference }) => {
       setError(null);
       setPatientId('');
+      setRecorded('');
       setAddMessage(
         result.created
-          ? { type: 'ok', text: `${patient.name} was added to the waitlist. Contact preference: ${preferenceLabel(patient)}.` }
+          ? {
+              type: 'ok',
+              text: `${patient.name} was added to the waitlist. Contact preference: ${preferenceLabel(preference ?? patient.contactPreference)}.`,
+            }
           : { type: 'ok', text: `${patient.name} is already on the waitlist.` },
       );
       refresh();
     },
-    onError: (err, patient) => {
+    onError: (err, { patient }) => {
       const notRegistered = err instanceof ApiError && err.code === 'patient_not_found';
       setAddMessage({
         type: 'err',
@@ -97,6 +103,7 @@ export function StaffView({ now = Date.now }: { now?: () => number } = {}) {
   const entries = (view?.entries ?? []).filter((e) => e.status === 'waiting' || e.status === 'notified');
   const candidates = (patients.data?.patients ?? []).filter((p) => !p.onWaitlist);
   const chosen = candidates.find((p) => String(p.id) === patientId);
+  const needsPreference = chosen !== undefined && chosen.contactPreference === null;
   const busy = release.isPending || pass.isPending || recordAccept.isPending || recordDecline.isPending;
 
   return (
@@ -120,7 +127,11 @@ export function StaffView({ now = Date.now }: { now?: () => number } = {}) {
 
       <div className="add-panel">
         <span className="add-label">Add a patient on their behalf:</span>
-        <select className="field" aria-label="Patient to add" value={patientId} onChange={(e) => setPatientId(e.target.value)}>
+        <select className="field" aria-label="Patient to add" value={patientId} onChange={(e) => {
+            setPatientId(e.target.value);
+            setRecorded('');
+          }}
+        >
           <option value="">Choose a patient</option>
           {candidates.map((p) => (
             <option key={p.id} value={p.id}>
@@ -128,7 +139,24 @@ export function StaffView({ now = Date.now }: { now?: () => number } = {}) {
             </option>
           ))}
         </select>
-        <Button small variant="secondary" disabled={!chosen || add.isPending} onClick={() => chosen && add.mutate(chosen)}>
+        {needsPreference && (
+          <select
+            className="field"
+            aria-label="Contact preference"
+            value={recorded}
+            onChange={(e) => setRecorded(e.target.value as ContactPreference | '')}
+          >
+            <option value="">Choose in-app or telephone</option>
+            <option value="in_app">{PREFERENCE_LABEL.in_app}</option>
+            <option value="telephone">{PREFERENCE_LABEL.telephone}</option>
+          </select>
+        )}
+        <Button
+          small
+          variant="secondary"
+          disabled={!chosen || add.isPending || (needsPreference && recorded === '')}
+          onClick={() => chosen && add.mutate({ patient: chosen, preference: needsPreference && recorded !== '' ? recorded : undefined })}
+        >
           Add to waitlist
         </Button>
       </div>
@@ -166,8 +194,8 @@ export function StaffView({ now = Date.now }: { now?: () => number } = {}) {
   );
 }
 
-function preferenceLabel(patient: PatientSummary): string {
-  return patient.contactPreference ? PREFERENCE_LABEL[patient.contactPreference] : 'Not recorded';
+function preferenceLabel(preference: ContactPreference | null): string {
+  return preference ? PREFERENCE_LABEL[preference] : 'Not recorded';
 }
 
 /**

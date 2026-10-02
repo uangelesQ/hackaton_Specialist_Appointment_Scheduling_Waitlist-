@@ -343,11 +343,20 @@ describe('staff waitlist view', () => {
       { id: 1, name: 'Maria Gómez', onWaitlist: false, contactPreference: 'in_app' as const },
     ];
 
-    async function choose(name: string) {
+    async function pick(name: string) {
       const select = await screen.findByLabelText('Patient to add');
       await screen.findByRole('option', { name });
       const option = within(select).getByRole('option', { name }) as HTMLOptionElement;
       fireEvent.change(select, { target: { value: option.value } });
+    }
+
+    /** Picks a caller and adds them; `preference` is chosen first for a caller who has none (US-006). */
+    async function choose(name: string, preference?: 'In-app' | 'Telephone') {
+      await pick(name);
+      if (preference) {
+        const select = await screen.findByLabelText('Contact preference');
+        fireEvent.change(select, { target: { value: preference === 'In-app' ? 'in_app' : 'telephone' } });
+      }
       fireEvent.click(screen.getByRole('button', { name: 'Add to waitlist' }));
     }
 
@@ -389,19 +398,17 @@ describe('staff waitlist view', () => {
       expect(await screen.findByRole('cell', { name: 'Jorge Ramírez' })).toBeInTheDocument();
     });
 
-    it.each([
-      ['Ana Torres', 'Not recorded'],
-      ['Maria Gómez', 'In-app'],
-    ])('shows %s\'s preference as "%s" in the confirmation', async (name, label) => {
+    it("shows an in-app caller's preference in the confirmation", async () => {
       api.addPatient.mockResolvedValue({
         created: true,
-        entry: { id: 9, patientId: 5, status: 'waiting', position: 2, joinedAt: '2026-10-02T09:00:00.000Z' },
+        entry: { id: 9, patientId: 1, status: 'waiting', position: 2, joinedAt: '2026-10-02T09:00:00.000Z' },
       });
       show();
 
-      await choose(name);
+      await choose('Maria Gómez');
 
-      expect(await screen.findByText(`${name} was added to the waitlist. Contact preference: ${label}.`)).toBeInTheDocument();
+      expect(await screen.findByText('Maria Gómez was added to the waitlist. Contact preference: In-app.')).toBeInTheDocument();
+      expect(api.addPatient).toHaveBeenCalledWith(1);
     });
 
     it('says when the patient is already on the waitlist, and that nothing was added', async () => {
@@ -421,10 +428,10 @@ describe('staff waitlist view', () => {
       api.addPatient.mockRejectedValue(new ApiError(404, 'patient_not_found'));
       show();
 
-      await choose('Ana Torres');
+      await choose('Jorge Ramírez');
 
       expect(await screen.findByRole('alert')).toHaveTextContent(
-        'Ana Torres is not registered in hospital records. They must register before joining the waitlist.',
+        'Jorge Ramírez is not registered in hospital records. They must register before joining the waitlist.',
       );
       expect(screen.queryByText(/was added to the waitlist/)).not.toBeInTheDocument();
     });
@@ -436,6 +443,85 @@ describe('staff waitlist view', () => {
       await choose('Jorge Ramírez');
 
       expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong');
+    });
+
+    describe('a caller with no recorded preference (8.1)', () => {
+      const added = {
+        created: true,
+        entry: { id: 9, patientId: 5, status: 'waiting' as const, position: 2, joinedAt: '2026-10-02T09:00:00.000Z' },
+      };
+
+      it('asks staff to choose in-app or telephone, and keeps Add disabled until one is chosen', async () => {
+        show();
+
+        await pick('Ana Torres');
+
+        const select = await screen.findByLabelText('Contact preference');
+        expect(within(select).getAllByRole('option').map((o) => o.textContent)).toEqual([
+          'Choose in-app or telephone',
+          'In-app',
+          'Telephone',
+        ]);
+        expect(screen.getByRole('button', { name: 'Add to waitlist' })).toBeDisabled();
+        expect(api.addPatient).not.toHaveBeenCalled();
+
+        fireEvent.change(select, { target: { value: 'telephone' } });
+
+        expect(screen.getByRole('button', { name: 'Add to waitlist' })).toBeEnabled();
+      });
+
+      it('sends the choice with the add and shows the recorded preference in the confirmation', async () => {
+        api.addPatient.mockResolvedValue(added);
+        show();
+
+        await choose('Ana Torres', 'Telephone');
+
+        await waitFor(() => expect(api.addPatient).toHaveBeenCalledWith(5, 'telephone'));
+        expect(await screen.findByText('Ana Torres was added to the waitlist. Contact preference: Telephone.')).toBeInTheDocument();
+      });
+
+      it('shows no preference choice for a caller who already has one, and sends none', async () => {
+        api.addPatient.mockResolvedValue({ ...added, entry: { ...added.entry, patientId: 6 } });
+        show();
+
+        await pick('Jorge Ramírez');
+
+        expect(screen.queryByLabelText('Contact preference')).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Add to waitlist' })).toBeEnabled();
+        fireEvent.click(screen.getByRole('button', { name: 'Add to waitlist' }));
+        await waitFor(() => expect(api.addPatient).toHaveBeenCalledWith(6));
+      });
+
+      it('forgets the choice when a different caller is picked', async () => {
+        show();
+
+        await pick('Ana Torres');
+        fireEvent.change(await screen.findByLabelText('Contact preference'), { target: { value: 'in_app' } });
+        await pick('Jorge Ramírez');
+        await pick('Ana Torres');
+
+        expect((await screen.findByLabelText('Contact preference')) as HTMLSelectElement).toHaveValue('');
+        expect(screen.getByRole('button', { name: 'Add to waitlist' })).toBeDisabled();
+      });
+
+      it('explains a refusal because no choice was made', async () => {
+        api.addPatient.mockRejectedValue(new ApiError(409, 'preference_required'));
+        show();
+
+        await choose('Ana Torres', 'In-app');
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(/choose in-app or telephone/i);
+        expect(screen.queryByText(/was added to the waitlist/)).not.toBeInTheDocument();
+      });
+
+      it('explains that a preference already recorded cannot be changed from here', async () => {
+        api.addPatient.mockRejectedValue(new ApiError(409, 'preference_already_recorded'));
+        show();
+
+        await choose('Ana Torres', 'In-app');
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(/already has a contact preference.*only the patient can change it/i);
+      });
     });
   });
 });
