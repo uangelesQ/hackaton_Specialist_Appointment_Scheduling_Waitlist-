@@ -58,8 +58,7 @@ test.describe('Only the first action resolves an offer', () => {
     await expect(respondToOffer.getBookedHeading()).toHaveCount(0)
   })
 
-  test.fixme('A staff pass-on after a recorded acceptance is rejected and the booking stands', async ({ api, flow, auth, releaseSlot, viewWaitlist }) => {
-    // Blocked: the record actions are not built (OpenSpec tasks 3.3, 3.5)
+  test('A staff pass-on after a recorded acceptance is rejected and the booking stands', async ({ api, flow }) => {
     await describeCase({
       id: 'TC-BR012-001',
       feature: 'BR-012 First action wins',
@@ -67,17 +66,16 @@ test.describe('Only the first action resolves an offer', () => {
       severity: 'critical',
       tag: 'concurrency',
     })
-    const { staffToken, offerId } = await flow.seedAndRelease(['telephone1', 'inApp1'], nextSlot())
-    await api.recordAccepted(staffToken, offerId)
+    const { staffToken, offerId } = await flow.seedAndRelease(['telephone1', 'telephone2'], nextSlot())
+    expect((await api.recordAccepted(staffToken, offerId)).status).toBe(200)
 
-    await auth.signInAs('staff1')
     const late = await api.passOn(staffToken, offerId)
     expect(late.status).toBe(409)
     expect(late.body.error).toBe('offer_not_available')
-    await expect(viewWaitlist.getRowByPatient(actor('telephone1').name)).toHaveCount(0)
-    await expect(releaseSlot.getPassOnButton()).toHaveCount(0)
+    const view = await api.staffWaitlist(staffToken)
+    expect(view.entries.map((entry) => entry.patientName)).toEqual([actor('telephone2').name])
 
-    const second = await flow.seedAndRelease(['notRecorded1'], nextSlot())
+    const second = await flow.seedAndRelease([], nextSlot())
     const results = await Promise.all([api.recordAccepted(second.staffToken, second.offerId), api.passOn(second.staffToken, second.offerId)])
     expect(results.map((result) => result.status).sort()).toContain(409)
   })

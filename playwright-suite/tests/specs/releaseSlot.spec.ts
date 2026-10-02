@@ -14,8 +14,7 @@ test.describe('Release an open slot', () => {
     await api.restoreCleanState()
   })
 
-  test.fixme('Releasing a slot offers it to the next patient in line only', async ({ api, auth, releaseSlot, viewWaitlist }) => {
-    // Blocked: telephone holder and call flag are not built (OpenSpec tasks 1.3, 4.1, 5.4)
+  test('Releasing a slot offers it to the next patient in line only', async ({ api, auth, releaseSlot, viewWaitlist }) => {
     await describeCase({
       id: 'TC-US009-001',
       feature: 'US-009 Release an open slot',
@@ -24,14 +23,14 @@ test.describe('Release an open slot', () => {
       tag: 'positive',
     })
     const carlos = actor('telephone1')
-    await api.seedWaiting(['telephone1', 'notRecorded1', 'inApp1'])
+    await api.seedWaiting(['telephone1', 'telephone2', 'inApp1'])
 
     await auth.signInAs('staff1')
     await releaseSlot.releaseSlot(nextSlot())
 
     await expect(viewWaitlist.getStatusCell(carlos.name)).toContainText('Notified')
     await expect(viewWaitlist.getRequiresCallFlag(carlos.name)).toBeVisible()
-    await expect(viewWaitlist.getStatusCell(actor('notRecorded1').name)).toContainText('Waiting')
+    await expect(viewWaitlist.getStatusCell(actor('telephone2').name)).toContainText('Waiting')
     await expect(viewWaitlist.getStatusCell(actor('inApp1').name)).toContainText('Waiting')
     await expect(viewWaitlist.getPositionCell(carlos.name)).toHaveText('1')
   })
@@ -44,7 +43,7 @@ test.describe('Release an open slot', () => {
       severity: 'critical',
       tag: 'concurrency',
     })
-    const { staffToken, offerId } = await flow.seedAndRelease(['telephone1', 'notRecorded1', 'inApp1'], nextSlot())
+    const { staffToken, offerId } = await flow.seedAndRelease(['telephone1', 'telephone2', 'inApp1'], nextSlot())
 
     await auth.signInAs('staff1')
     await expect(releaseSlot.getWaitingOnText(actor('telephone1').name)).toBeVisible()
@@ -54,8 +53,7 @@ test.describe('Release an open slot', () => {
     expect(second.status).toBe(409)
     expect(second.body.error).toBe('offer_outstanding')
 
-    const holderToken = await api.tokenFor('telephone1')
-    expect((await api.decline(holderToken, offerId)).status).toBe(200)
+    await api.recordDeclined(staffToken, offerId)
     const secondStaffToken = await api.tokenFor('staff2')
     const results = await Promise.all([api.release(staffToken), api.release(secondStaffToken)])
     expect(results.map((result) => result.status).sort()).toEqual([201, 409])

@@ -33,7 +33,6 @@ export class ViewWaitlistPO {
     return this.getRowByPatient(name).getByRole('button', { name: `Remove ${name}` })
   }
 
-  // Not built yet: the preference cell and the call flag come from the OpenSpec change
   getContactPreferenceCell(name: string): Locator {
     return this.getRowByPatient(name).getByRole('cell', { name: /^(In-app|Telephone|Not recorded)$/ })
   }

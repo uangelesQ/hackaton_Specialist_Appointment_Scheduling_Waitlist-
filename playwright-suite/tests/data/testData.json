@@ -1,37 +1,43 @@
 {
   "specialist": "Dr. Elena Ruiz",
-  "profiles": {
-    "current": {
-      "inApp1": { "name": "Ana Torres", "role": "patient" },
-      "inApp2": { "name": "Ben Carter", "role": "patient" },
-      "inApp3": { "name": "Chloe Nguyen", "role": "patient" },
-      "telephone1": { "name": "David Okafor", "role": "patient" },
-      "telephone2": { "name": "Jorge Ramírez", "role": "patient" },
-      "notRecorded1": { "name": "Eva Lindqvist", "role": "patient" },
-      "staff1": { "name": "Sam Patel", "role": "staff" },
-      "staff2": { "name": "Maria Gomez", "role": "staff" }
-    },
-    "v3": {
-      "inApp1": { "name": "Maria Gómez", "role": "patient" },
-      "inApp2": { "name": "Diego Herrera", "role": "patient" },
-      "inApp3": { "name": "Valeria Tapia", "role": "patient" },
-      "telephone1": { "name": "Carlos Mendoza", "role": "patient" },
-      "telephone2": { "name": "Jorge Ramírez", "role": "patient" },
-      "notRecorded1": { "name": "Ana Torres", "role": "patient" },
-      "staff1": { "name": "Ricardo Salazar", "role": "staff" },
-      "staff2": { "name": "Guadalupe Ortega", "role": "staff" }
-    }
+  "actors": {
+    "inApp1": { "name": "Maria Gómez", "role": "patient" },
+    "inApp2": { "name": "Diego Herrera", "role": "patient" },
+    "inApp3": { "name": "Valeria Tapia", "role": "patient" },
+    "telephone1": { "name": "Carlos Mendoza", "role": "patient" },
+    "telephone2": { "name": "Jorge Ramírez", "role": "patient" },
+    "noPref1": { "name": "Ana Torres", "role": "patient" },
+    "staff1": { "name": "Ricardo Salazar", "role": "staff" },
+    "staff2": { "name": "Guadalupe Ortega", "role": "staff" }
+  },
+  "baselinePreferences": {
+    "inApp1": "in_app",
+    "inApp2": "in_app",
+    "inApp3": "in_app",
+    "telephone1": "telephone",
+    "telephone2": "telephone",
+    "noPref1": null
   },
   "unregisteredPatientId": 99999,
   "labels": {
     "releaseSlot": "Release slot",
-    "passOn": "No response — offer to next patient",
+    "passOn": "Couldn't reach them — pass to next",
     "recordAccepted": "They accepted",
     "recordDeclined": "They declined",
     "emptyWaitlist": "No patients are currently waiting.",
     "returnedSlot": "A returned slot is ready to release",
+    "noEligible": "No eligible patient remains for this slot.",
     "bannerText": "A slot just opened for you",
     "offerNoLongerAvailable": "This offer is no longer available.",
-    "requiresCall": "Requires a call"
+    "requiresCall": "Requires a call",
+    "notChosenYet": "Not chosen yet",
+    "joinChoicePrompt": "Choose how you would like to be contacted when a slot opens.",
+    "telephoneHolderNotice": "A slot has opened for you. A member of our team will contact you about it.",
+    "staffWillRecordAlert": "Staff will record your answer for you, so it cannot be given in the app.",
+    "staffCannotRecordAlert": "This patient answers in the app, so staff cannot record a response for them.",
+    "joinFailedAlert": "You have not joined the waitlist. Your contact preference was saved, so you won't be asked again.",
+    "registerNameRequired": "Enter a name to register.",
+    "registerPreferenceRequired": "Choose in-app or telephone as the contact preference.",
+    "nameAlreadyRegistered": "That name is already registered. You can sign in as that patient instead."
   }
 }

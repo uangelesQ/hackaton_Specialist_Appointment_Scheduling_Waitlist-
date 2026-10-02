@@ -1,7 +1,6 @@
 import { type Locator, type Page } from '@playwright/test'
 import testData from '../data/testData.json'
 
-// Not built yet: both actions come from the OpenSpec change, not from the current app
 export class RecordPhoneResponsePO {
   constructor(private readonly page: Page) {}
 
@@ -11,6 +10,10 @@ export class RecordPhoneResponsePO {
 
   getRecordDeclinedButton(): Locator {
     return this.page.getByRole('button', { name: testData.labels.recordDeclined })
+  }
+
+  getCannotRecordAlert(): Locator {
+    return this.page.getByRole('alert').filter({ hasText: testData.labels.staffCannotRecordAlert })
   }
 
   async recordAccepted(): Promise<void> {

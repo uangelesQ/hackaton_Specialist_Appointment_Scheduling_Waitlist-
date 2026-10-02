@@ -14,8 +14,7 @@ test.describe('A booked slot is not released again', () => {
     await api.restoreCleanState()
   })
 
-  test.fixme('A booked slot cannot be released again', async ({ api, flow, auth, releaseSlot, viewWaitlist }) => {
-    // Blocked: the booked-slot refusal is not built (OpenSpec task 2.4)
+  test('A booked slot cannot be released again', async ({ api, flow, auth, releaseSlot, viewWaitlist }) => {
     await describeCase({
       id: 'TC-BR013-001',
       feature: 'BR-013 Booked slot is not released again',
@@ -37,6 +36,6 @@ test.describe('A booked slot is not released again', () => {
     expect((await api.staffWaitlist(staffToken)).offer).toBeNull()
 
     await releaseSlot.releaseSlot(slotB)
-    await expect(viewWaitlist.getStatusCell(actor('inApp2').name)).toBeVisible()
+    await expect(viewWaitlist.getStatusCell(actor('inApp2').name)).toContainText('Notified')
   })
 })

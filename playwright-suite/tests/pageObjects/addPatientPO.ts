@@ -1,4 +1,5 @@
 import { type Locator, type Page } from '@playwright/test'
+import { type PreferenceOption } from './signInPO'
 
 export class AddPatientPO {
   constructor(private readonly page: Page) {}
@@ -7,21 +8,25 @@ export class AddPatientPO {
     return this.page.getByRole('combobox', { name: 'Patient to add' })
   }
 
+  getContactPreferenceSelect(): Locator {
+    return this.page.getByRole('combobox', { name: 'Contact preference' })
+  }
+
   getAddButton(): Locator {
     return this.page.getByRole('button', { name: 'Add to waitlist' })
   }
 
-  // Not built yet: these messages come from the OpenSpec change, not from the current app
-  getAddConfirmation(name: string): Locator {
-    return this.page.getByText(`${name} added to the waitlist`)
+  getAddConfirmation(name: string, option: PreferenceOption): Locator {
+    return this.page.getByRole('status').filter({ hasText: `${name} was added to the waitlist. Contact preference: ${option}.` })
   }
 
-  getAlreadyOnWaitlistMessage(name: string): Locator {
-    return this.page.getByText(`${name} is already on the waitlist`)
-  }
-
-  async addPatient(name: string): Promise<void> {
+  async selectPatient(name: string): Promise<void> {
     await this.getPatientPicker().selectOption({ label: name })
+  }
+
+  async addPatient(name: string, preference?: PreferenceOption): Promise<void> {
+    await this.selectPatient(name)
+    if (preference) await this.getContactPreferenceSelect().selectOption({ label: preference })
     await this.getAddButton().click()
   }
 }

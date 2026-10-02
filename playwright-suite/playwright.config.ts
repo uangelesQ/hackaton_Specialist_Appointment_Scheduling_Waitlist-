@@ -22,7 +22,6 @@ export default defineConfig({
         environmentInfo: {
           baseUrl: baseURL,
           apiUrl: process.env.API_URL ?? 'http://localhost:3001',
-          seedProfile: process.env.SEED_PROFILE ?? 'current',
           node: process.version,
         },
       },

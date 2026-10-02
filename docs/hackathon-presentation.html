@@ -206,21 +206,21 @@
           <h3>Julio Flores</h3>
           <span class="role">BA</span>
           <p>Product Spec authoring, user stories, acceptance criteria.</p>
-          <div class="extra"><b>In this deck:</b> Product Spec PS-001, v0.1 to v2.4.</div>
+          <div class="extra"><b>In this deck:</b> Product Spec PS-001, v0.1 to v2.5.</div>
         </article>
         <article class="person">
           <div class="avatar" aria-hidden="true">Q</div>
           <h3>Uriel Angeles</h3>
           <span class="role">QA</span>
           <p>Business rules review, edge cases, spec-vs-build alignment.</p>
-          <div class="extra"><b>In this deck:</b> spec reviews, QA test spec with 20 cases, Playwright suite with Allure report.</div>
+          <div class="extra"><b>In this deck:</b> spec reviews, two QA specs (46 cases), Playwright suite (50 tests) with Allure report.</div>
         </article>
         <article class="person">
           <div class="avatar" aria-hidden="true">D</div>
           <h3>Juan Carlos Abarca</h3>
           <span class="role">BE / FE Dev</span>
           <p>Data model, implementation feasibility, build support.</p>
-          <div class="extra"><b>In this deck:</b> the build behind the demo.</div>
+          <div class="extra"><b>In this deck:</b> the build behind the demo, three OpenSpec changes.</div>
         </article>
       </div>
     </div>
@@ -259,11 +259,11 @@
     <div class="content">
       <div class="flow">
         <div class="step"><div class="n">1</div><h3>Problem and PRD</h3><p>The business problem and goals in <code>PRD-specialist-appointment-waitlist.md</code>.</p></div>
-        <div class="step"><div class="n">2</div><h3>Product Spec</h3><p>PS-001 across nine versions: v0.1 to v0.4, then v2.0 to v2.4 after the real brief.</p></div>
+        <div class="step"><div class="n">2</div><h3>Product Spec</h3><p>PS-001 across ten versions: v0.1 to v0.4, then v2.0 to v2.5 (v2.5 is a Draft).</p></div>
         <div class="step"><div class="n">3</div><h3>Journey maps and prototype</h3><p>Journey maps and a working HTML prototype, kept in step with the spec through V3.</p></div>
-        <div class="step"><div class="n">4</div><h3>OpenSpec technical spec</h3><p>The MVP change was built with 32 of 32 tasks done. A second change for spec v2.4 is planned: 30 tasks, none done yet.</p></div>
-        <div class="step"><div class="n">5</div><h3>QA test spec</h3><p>20 test cases traced to acceptance criteria and business rules, with a gap log and a coverage matrix.</p></div>
-        <div class="step"><div class="n">6</div><h3>Reviews and automation</h3><p>spec-readiness-review and spec-critic runs on the spec, and a Playwright suite with an Allure report.</p></div>
+        <div class="step"><div class="n">4</div><h3>OpenSpec technical spec</h3><p>Three changes, all built: 32, 30 and 25 tasks (87 of 87). The last one, for v2.5, is not archived yet.</p></div>
+        <div class="step"><div class="n">5</div><h3>QA test spec</h3><p>46 test cases in two specs (20 + 26 for v2.5), traced to criteria and rules, with gap logs and coverage matrices.</p></div>
+        <div class="step"><div class="n">6</div><h3>Reviews and automation</h3><p>spec-readiness-review and spec-critic runs on the spec, and a 50-test Playwright suite with an Allure report.</p></div>
       </div>
     </div>
   </section>
@@ -278,13 +278,13 @@
         <div class="pillar"><div class="chip" aria-hidden="true">G</div><h3>Governance</h3>
           <p>We overruled an AI suggestion to let urgent cases jump the waitlist — real clinics absorb emergencies as same-day delays, not queue reordering, so we locked in <b>strict FIFO</b>.<span class="ev"><i>Evidence</i>BR-006 and the resolved decision in PS-001 section 14</span></p></div>
         <div class="pillar"><div class="chip" aria-hidden="true">A</div><h3>Alignment</h3>
-          <p>UX built the journey maps and working prototype; BA/QA folded every open decision into the Product Spec — each round of feedback updated both before the next build pass.<span class="ev"><i>Evidence</i>Open review findings became questions for the Product Owner; the answers were applied in spec v2.4 and the QA spec</span></p></div>
+          <p>UX built the journey maps and working prototype; BA/QA folded every open decision into the Product Spec — each round of feedback updated both before the next build pass.<span class="ev"><i>Evidence</i>Open review findings became Product Owner questions; answers applied in spec v2.4, v2.5 and both QA specs</span></p></div>
         <div class="pillar"><div class="chip" aria-hidden="true">Q</div><h3>Quality</h3>
-          <p>We caught our own prototype contradicting our own business rule — a decline was auto-cascading to the next patient when the spec required a separate staff action. Fixed before it reached the team.<span class="ev"><i>Evidence</i>Reviews also flagged "first in line" contradicting the skip rule; fixed in v2.3</span></p></div>
+          <p>We caught our own prototype contradicting our own business rule — a decline was auto-cascading to the next patient when the spec required a separate staff action. Fixed before it reached the team.<span class="ev"><i>Evidence</i>"First in line" contradicted the skip rule (fixed in v2.3); v2.5 review logged 11 new gaps</span></p></div>
         <div class="pillar"><div class="chip" aria-hidden="true">L</div><h3>Living Agility</h3>
-          <p>A missed Confluence brief, found mid-hackathon, reframed our entire scope — from a single private clinic to one pilot specialty inside an 8-specialty public hospital — and the spec was rewritten to match, not the other way around.<span class="ev"><i>Evidence</i>PS-001 v0.4 realigned as v2.0; scope narrowed again in v2.2</span></p></div>
+          <p>A missed Confluence brief, found mid-hackathon, reframed our entire scope — from a single private clinic to one pilot specialty inside an 8-specialty public hospital — and the spec was rewritten to match, not the other way around.<span class="ev"><i>Evidence</i>PS-001 v0.4 realigned as v2.0; v2.5 reversed read-only preference</span></p></div>
         <div class="pillar"><div class="chip" aria-hidden="true">A</div><h3>Adaptability</h3>
-          <p>We kept the prototype one HTML page with internal tabs instead of multiple pages, specifically because our dev needed to build fast — calibrated to the week's real constraint, not gold-plated.<span class="ev"><i>Evidence</i>QA test spec capped at 20 cases; the suite automates only what can run on today's build</span></p></div>
+          <p>We kept the prototype one HTML page with internal tabs instead of multiple pages, specifically because our dev needed to build fast — calibrated to the week's real constraint, not gold-plated.<span class="ev"><i>Evidence</i>The v2.5 QA spec is a delta: only what changed, 26 cases of a 30 limit</span></p></div>
       </div>
     </div>
   </section>
@@ -292,7 +292,7 @@
   <!-- 6. Evidence in numbers -->
   <section class="slide" aria-label="Evidence in numbers">
     <h2>What the reviews and tests say</h2>
-    <p class="sub">Our own runs of the spec-readiness-review skill, the QA test spec and the Playwright suite.</p>
+    <p class="sub">Our own runs of the spec-readiness-review skill, the QA test specs and the Playwright suite.</p>
     <div class="rule"></div>
     <div class="content">
       <div class="numbers">
@@ -302,22 +302,22 @@
             <div class="bar-row"><span>Spec v2.1</span><div class="bar-track"><div class="bar-fill" style="width:70.8%"></div><div class="bar-mark" style="left:70.8%"></div></div><span class="bar-value">46</span></div>
             <div class="bar-row"><span>Spec v2.4</span><div class="bar-track"><div class="bar-fill" style="width:80%"></div><div class="bar-mark" style="left:70.8%"></div><span class="bar-marklabel" style="left:70.8%">46 = Minor Revisions Needed starts</span></div><span class="bar-value">52</span></div>
           </div>
-          <p class="note" style="margin-top:78px">Both scores fall in "Minor Revisions Needed". The spec-critic still says "Requires Refinement" for v2.4, with open Product Owner confirmations.</p>
+          <p class="note" style="margin-top:78px">Both scores fall in "Minor Revisions Needed". v2.5 has not been scored yet. The spec-critic still says "Requires Refinement" for v2.4.</p>
           <p class="note"><b>Scale:</b> 59 to 65 SDD-Ready · 46 to 58 Minor Revisions Needed · 33 to 45 Significant Revisions Needed · below 33 Not Ready.</p>
         </div>
         <div class="right-col">
           <div class="panel">
             <h3>QA test spec</h3>
             <div class="kpis">
-              <div class="kpi"><strong>20</strong><span>test cases, the agreed maximum</span></div>
-              <div class="kpi"><strong>15</strong><span>gaps logged; 6 resolved by the Product Owner</span></div>
+              <div class="kpi"><strong>46</strong><span>test cases in two specs: 20 + 26 (v2.5)</span></div>
+              <div class="kpi"><strong>26</strong><span>gaps (15 + 11); 6 resolved by the Product Owner</span></div>
             </div>
           </div>
           <div class="panel">
             <h3>Playwright suite, today's build</h3>
             <div class="kpis">
-              <div class="kpi"><strong>12</strong><span>tests passing</span></div>
-              <div class="kpi"><strong>11</strong><span>skipped until the telephone path is built</span></div>
+              <div class="kpi"><strong>50</strong><span>tests in the suite, up from 23</span></div>
+              <div class="kpi"><strong>0</strong><span>skipped: telephone path and preference are built</span></div>
             </div>
           </div>
         </div>
@@ -346,8 +346,8 @@
         </div>
         <div class="open" aria-label="Still open">
           <div class="tag">Still open</div>
-          <div class="item"><b>Spec status.</b> v2.0 called itself "Ready with Minor Refinement"; the review said "Requires Refinement". We corrected it, and v2.4 still carries open confirmations.</div>
-          <div class="item"><b>Telephone path.</b> It is specified, but not built yet: 0 of 30 tasks done, so 11 automated tests wait for it.</div>
+          <div class="item"><b>Spec status.</b> v2.5 is a Draft: it reverses the read-only preference hospital operations confirmed, and they have not confirmed the change yet.</div>
+          <div class="item"><b>Test evidence.</b> The 50 tests are written, none skipped. A full run on the final build comes before we present.</div>
         </div>
       </div>
     </div>
@@ -371,9 +371,9 @@
           <div class="col today"><h3>Today</h3>
             <ul>
               <li>One pilot specialty in an 8-specialty hospital — confirmed</li>
-              <li>Position display deferred — explicitly out of this iteration</li>
-              <li>Removal deferred — explicitly out of this iteration</li>
-              <li>Telephone path is a primary path, not an edge case</li>
+              <li>Position display and removal deferred — out of this iteration</li>
+              <li>Patients set their own contact preference (v2.5, Draft)</li>
+              <li>Telephone path is a primary path, built and tested</li>
             </ul></div>
         </div>
         <div class="trail" aria-label="Spec version trail">
@@ -381,8 +381,8 @@
           <div><b>v2.0</b>Realigned to the approved Use Case</div>
           <div><b>v2.1</b>Review findings fixed</div>
           <div><b>v2.2</b>Scope narrowed to registry, slot release, acceptance</div>
-          <div><b>v2.3</b>Consistency fixes</div>
-          <div><b>v2.4</b>Product Owner decisions applied</div>
+          <div><b>v2.3–2.4</b>Consistency fixes, PO decisions</div>
+          <div><b>v2.5</b>Preference set in app (Draft)</div>
         </div>
       </div>
     </div>

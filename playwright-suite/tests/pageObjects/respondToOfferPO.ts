@@ -44,6 +44,14 @@ export class RespondToOfferPO {
     return this.page.getByText('Contact the office')
   }
 
+  getTelephoneHolderNotice(): Locator {
+    return this.page.getByText(testData.labels.telephoneHolderNotice)
+  }
+
+  getStaffWillRecordAlert(): Locator {
+    return this.page.getByRole('alert').filter({ hasText: testData.labels.staffWillRecordAlert })
+  }
+
   getOfferUnavailableAlert(): Locator {
     return this.page.getByText(testData.labels.offerNoLongerAvailable)
   }

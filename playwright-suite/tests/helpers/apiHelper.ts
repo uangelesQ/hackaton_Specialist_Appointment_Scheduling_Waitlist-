@@ -1,4 +1,5 @@
 import { type APIRequestContext } from '@playwright/test'
+import { resetPreferences } from './dbHelper'
 import { apiUrl } from './env'
 import { actor, type Actor, type ActorAlias } from './actors'
 import { addLegacyWaitingEntry } from './e2eDb'
@@ -19,15 +20,26 @@ interface StaffEntry {
   patientName: string
   status: string
   position: number
+  contactPreference: string | null
 }
 
 export interface StaffWaitlist {
   entries: StaffEntry[]
-  offer: { id: number; entryId: number; slotStartsAt: string } | null
+  offer: { id: number; entryId: number; slotStartsAt: string; requiresCall?: boolean } | null
   release: { available: boolean; reason: string | null; openSlotStartsAt: string | null }
 }
 
-type Method = 'get' | 'post' | 'delete'
+type Method = 'get' | 'post' | 'put' | 'delete'
+
+/** A route that does not exist answers with text, not JSON. */
+function parseBody(text: string): any {
+  if (!text) return undefined
+  try {
+    return JSON.parse(text)
+  } catch {
+    return text
+  }
+}
 
 export class ApiHelper {
   private users?: { patients: UserSummary[]; staff: UserSummary[] }
@@ -40,7 +52,7 @@ export class ApiHelper {
       data,
     })
     const text = await response.text()
-    return { status: response.status(), body: text ? JSON.parse(text) : undefined }
+    return { status: response.status(), body: parseBody(text) }
   }
 
   async idOf(who: Actor): Promise<number> {
@@ -61,8 +73,20 @@ export class ApiHelper {
     return this.send('post', '/waitlist', await this.tokenFor(alias))
   }
 
-  async addPatient(staffToken: string, alias: ActorAlias): Promise<ApiResult> {
-    return this.send('post', `/waitlist/patients/${await this.idOf(actor(alias))}`, staffToken)
+  async addPatient(staffToken: string, alias: ActorAlias, contactPreference?: string): Promise<ApiResult> {
+    return this.send('post', `/waitlist/patients/${await this.idOf(actor(alias))}`, staffToken, contactPreference ? { contactPreference } : undefined)
+  }
+
+  async setPreference(token: string, contactPreference: string): Promise<ApiResult> {
+    return this.send('put', '/me/contact-preference', token, { contactPreference })
+  }
+
+  async me(token: string): Promise<ApiResult> {
+    return this.send('get', '/me/waitlist', token)
+  }
+
+  async register(name: string, contactPreference?: string): Promise<ApiResult> {
+    return this.send('post', '/demo/register', undefined, { name, contactPreference })
   }
 
   async release(staffToken: string, startsAtIso?: string): Promise<ApiResult> {
@@ -115,7 +139,7 @@ export class ApiHelper {
     }
   }
 
-  /** Leaves no outstanding offer and no active entry, and uses up a returned slot if one is left. */
+  /** Leaves no outstanding offer, no active entry and the seeded preferences, and uses up a returned slot. */
   async restoreCleanState(): Promise<void> {
     const staffToken = await this.tokenFor('staff1')
     for (let attempt = 0; attempt < 12; attempt += 1) {
@@ -124,20 +148,26 @@ export class ApiHelper {
       await this.passOn(staffToken, view.offer.id)
     }
     for (const entry of (await this.staffWaitlist(staffToken)).entries) await this.removeEntry(staffToken, entry.id)
+    resetPreferences()
     await this.useUpReturnedSlot(staffToken)
+    resetPreferences()
   }
 
   private async useUpReturnedSlot(staffToken: string): Promise<void> {
     if (!(await this.staffWaitlist(staffToken)).release.openSlotStartsAt) return
-    const patients: { id: number; name: string }[] = (await this.send('get', '/patients', staffToken)).body.patients
+    const patients: { id: number; contactPreference: string | null }[] = (await this.send('get', '/patients', staffToken)).body.patients
     for (const patient of patients) {
+      if (!patient.contactPreference) continue
       const added = await this.send('post', `/waitlist/patients/${patient.id}`, staffToken)
-      // A patient with no recorded preference cannot be added, and so cannot take the slot.
       if (added.status >= 400) continue
       const released = await this.release(staffToken)
       if (released.status === 201) {
-        const login = await this.send('post', '/demo/login', undefined, { role: 'patient', id: patient.id })
-        await this.accept(login.body.token, released.body.offer.id)
+        if (patient.contactPreference === 'telephone') {
+          await this.recordAccepted(staffToken, released.body.offer.id)
+        } else {
+          const login = await this.send('post', '/demo/login', undefined, { role: 'patient', id: patient.id })
+          await this.accept(login.body.token, released.body.offer.id)
+        }
         return
       }
       await this.removeEntry(staffToken, added.body.entry.id)

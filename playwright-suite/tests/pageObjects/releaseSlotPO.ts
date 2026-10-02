@@ -24,9 +24,12 @@ export class ReleaseSlotPO {
     return this.page.getByText(testData.labels.returnedSlot)
   }
 
-  // Not built yet: the message for a slot nobody is eligible for
   getNoEligibleText(): Locator {
-    return this.page.getByText('No eligible patient remains for this slot.')
+    return this.page.getByText(testData.labels.noEligible)
+  }
+
+  getTimeOutstanding(): Locator {
+    return this.page.getByText(/Outstanding for/)
   }
 
   async releaseSlot(startsAt?: string): Promise<void> {

@@ -4,10 +4,12 @@ import { AuthHelper } from '../helpers/authHelper'
 import { WaitlistFlow } from '../helpers/waitlistFlow'
 import { AddPatientPO } from '../pageObjects/addPatientPO'
 import { AppShellPO } from '../pageObjects/appShellPO'
+import { ContactPreferencePO } from '../pageObjects/contactPreferencePO'
 import { JoinWaitlistPO } from '../pageObjects/joinWaitlistPO'
 import { RecordPhoneResponsePO } from '../pageObjects/recordPhoneResponsePO'
 import { ReleaseSlotPO } from '../pageObjects/releaseSlotPO'
 import { RespondToOfferPO } from '../pageObjects/respondToOfferPO'
+import { SignInPO } from '../pageObjects/signInPO'
 import { ViewWaitlistPO } from '../pageObjects/viewWaitlistPO'
 
 type Fixtures = {
@@ -15,6 +17,8 @@ type Fixtures = {
   auth: AuthHelper
   flow: WaitlistFlow
   appShell: AppShellPO
+  signInPage: SignInPO
+  contactPreference: ContactPreferencePO
   joinWaitlist: JoinWaitlistPO
   addPatient: AddPatientPO
   viewWaitlist: ViewWaitlistPO
@@ -35,6 +39,12 @@ export const test = base.extend<Fixtures>({
   },
   appShell: async ({ page }, use) => {
     await use(new AppShellPO(page))
+  },
+  signInPage: async ({ page }, use) => {
+    await use(new SignInPO(page))
+  },
+  contactPreference: async ({ page }, use) => {
+    await use(new ContactPreferencePO(page))
   },
   joinWaitlist: async ({ page }, use) => {
     await use(new JoinWaitlistPO(page))
