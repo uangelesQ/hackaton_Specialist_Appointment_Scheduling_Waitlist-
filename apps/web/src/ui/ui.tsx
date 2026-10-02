@@ -137,3 +137,36 @@ export function PreferencePill({ preference }: { preference: ContactPreference |
   const { label, className } = PREFERENCE_PILLS[preference ?? 'notRecorded'];
   return <span className={`pref-pill ${className}`}>{label}</span>;
 }
+
+export const PREFERENCE_LABEL = { in_app: 'In-app', telephone: 'Telephone' } as const;
+
+const PREFERENCE_DESCRIPTION = {
+  in_app: 'offers appear in the app',
+  telephone: 'staff will call you',
+} as const;
+
+/** The two ways to be contacted, each described so the person knows how they will be reached. */
+export function PreferenceChoice({
+  name,
+  value,
+  onChange,
+  disabled = false,
+}: {
+  name: string;
+  value: ContactPreference | null;
+  onChange: (value: ContactPreference) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="pref-choice" role="radiogroup" aria-label="How should we contact you?">
+      {(['in_app', 'telephone'] as const).map((option) => (
+        <label key={option} className={`pref-option${value === option ? ' selected' : ''}`}>
+          <input type="radio" name={name} value={option} checked={value === option} disabled={disabled} onChange={() => onChange(option)} />
+          <span>
+            <b>{PREFERENCE_LABEL[option]}</b> — {PREFERENCE_DESCRIPTION[option]}
+          </span>
+        </label>
+      ))}
+    </div>
+  );
+}
