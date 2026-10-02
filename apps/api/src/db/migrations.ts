@@ -98,6 +98,28 @@ const migrations: Record<string, Knex.Migration> = {
       await db.raw('ALTER TABLE patients DROP COLUMN contact_preference');
     },
   },
+  '004_preference_audit': {
+    async up(db) {
+      // A preference change is audited with who, when, and the previous and new values. A patient with no
+      // entry has no entry_id, so the row names the patient it is about.
+      await db.schema.alterTable('audit_log', (t) => {
+        t.integer('patient_id').references('id').inTable('patients');
+        t.text('previous_value');
+        t.text('new_value');
+      });
+      // Backstop for the demo registration's duplicate-name check. SQLite folds only ASCII case, so the
+      // service compares names in code as well.
+      await db.raw('CREATE UNIQUE INDEX patients_full_name_unique ON patients (lower(full_name))');
+    },
+    async down(db) {
+      await db.raw('DROP INDEX patients_full_name_unique');
+      await db.schema.alterTable('audit_log', (t) => {
+        t.dropColumn('patient_id');
+        t.dropColumn('previous_value');
+        t.dropColumn('new_value');
+      });
+    },
+  },
 };
 
 // Migrations are registered in code so they work the same under tsx, vitest and tsc output.

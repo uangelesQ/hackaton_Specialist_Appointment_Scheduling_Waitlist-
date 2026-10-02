@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Knex } from 'knex';
 import { createDb } from './connection.js';
 import { migrateLatest } from './migrate.js';
+import { migrationSource } from './migrations.js';
 import { seedDatabase } from './seed.js';
 
 const NOW = '2026-10-01T09:00:00.000Z';
@@ -122,6 +123,52 @@ describe('waitlist schema', () => {
       await slot('open');
       await expect(slot('offered')).resolves.toBeDefined();
       await expect(slot('booked')).resolves.toBeDefined();
+    });
+  });
+
+  describe('preference audit and unique names (1.1, v2.5)', () => {
+    it('stores a patient and the previous and new values on an audit row', async () => {
+      await db('audit_log').insert({
+        action: 'contact_preference_set',
+        actor_type: 'patient',
+        actor_id: 1,
+        at: NOW,
+        patient_id: 1,
+        previous_value: 'in_app',
+        new_value: 'telephone',
+      });
+      expect(await db('audit_log').first()).toMatchObject({ patient_id: 1, previous_value: 'in_app', new_value: 'telephone' });
+    });
+
+    it('leaves the new columns null on existing kinds of audit row', async () => {
+      await db('audit_log').insert({ action: 'entry_created', actor_type: 'staff', actor_id: 1, at: NOW });
+      expect(await db('audit_log').first()).toMatchObject({ patient_id: null, previous_value: null, new_value: null });
+    });
+
+    it('rejects an audit row naming a patient that does not exist', async () => {
+      await expect(
+        db('audit_log').insert({ action: 'contact_preference_set', actor_type: 'patient', actor_id: 1, at: NOW, patient_id: 99 }),
+      ).rejects.toThrow(/FOREIGN KEY/i);
+    });
+
+    it('rejects a patient whose name differs only in letter case', async () => {
+      // SQLite folds only ASCII case, so this is a backstop: the registration service also compares in code.
+      await db('patients').insert({ full_name: 'Test Person' });
+      await expect(db('patients').insert({ full_name: 'TEST PERSON' })).rejects.toThrow(/UNIQUE/i);
+    });
+
+    it('allows two different names', async () => {
+      await expect(db('patients').insert({ full_name: 'Someone Else' })).resolves.toBeDefined();
+    });
+
+    it('migrates down and up again', async () => {
+      await db.migrate.down({ migrationSource });
+      expect(await db.schema.hasColumn('audit_log', 'previous_value')).toBe(false);
+      await db('patients').insert({ full_name: 'Test Person' });
+      await expect(db('patients').insert({ full_name: 'TEST PERSON' })).resolves.toBeDefined();
+      await db('patients').where({ full_name: 'TEST PERSON' }).del();
+      await migrateLatest(db);
+      expect(await db.schema.hasColumn('audit_log', 'previous_value')).toBe(true);
     });
   });
 

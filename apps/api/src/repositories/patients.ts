@@ -48,6 +48,17 @@ export function patientRepository(db: Knex | Knex.Transaction) {
       return row === undefined ? undefined : row.contact_preference;
     },
 
+    /**
+     * Writes the patient's contact preference and returns the value it replaced (`null` when none was
+     * recorded), or `undefined` when there is no such patient and nothing was written. Callers audit it.
+     */
+    async setPreference(id: number, value: ContactPreference): Promise<ContactPreference | null | undefined> {
+      const previous = await this.preferenceOf(id);
+      if (previous === undefined) return undefined;
+      await db('patients').where({ id }).update({ contact_preference: value });
+      return previous;
+    },
+
     /** Patient records keyed by id. Unknown ids are simply absent. */
     async byIds(ids: readonly number[]): Promise<Map<number, PatientRecord>> {
       const rows: PatientRow[] = await db('patients').whereIn('id', [...ids]);

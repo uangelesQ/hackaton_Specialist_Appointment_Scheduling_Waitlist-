@@ -9,6 +9,9 @@ interface AuditRow {
   actor_type: ActorType;
   actor_id: number;
   at: string;
+  patient_id: number | null;
+  previous_value: string | null;
+  new_value: string | null;
 }
 
 const toRecord = (row: AuditRow): AuditRecord => ({
@@ -19,6 +22,9 @@ const toRecord = (row: AuditRow): AuditRecord => ({
   actorType: row.actor_type,
   actorId: row.actor_id,
   at: row.at,
+  patientId: row.patient_id,
+  previousValue: row.previous_value,
+  newValue: row.new_value,
 });
 
 export function auditRepository(db: Knex | Knex.Transaction, clock: Clock) {
@@ -31,6 +37,9 @@ export function auditRepository(db: Knex | Knex.Transaction, clock: Clock) {
       slotId?: number | null;
       actorType: ActorType;
       actorId: number;
+      patientId?: number | null;
+      previousValue?: string | null;
+      newValue?: string | null;
     }): Promise<void> {
       await table().insert({
         action: input.action,
@@ -39,6 +48,9 @@ export function auditRepository(db: Knex | Knex.Transaction, clock: Clock) {
         actor_type: input.actorType,
         actor_id: input.actorId,
         at: clock(),
+        patient_id: input.patientId ?? null,
+        previous_value: input.previousValue ?? null,
+        new_value: input.newValue ?? null,
       });
     },
 

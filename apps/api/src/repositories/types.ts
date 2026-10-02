@@ -39,6 +39,11 @@ export interface AuditRecord {
   actorType: ActorType;
   actorId: number;
   at: string;
+  /** The patient a preference change is about; null for every other kind of row. */
+  patientId: number | null;
+  /** For a preference change: the value before (null when none was recorded) and after. */
+  previousValue: string | null;
+  newValue: string | null;
 }
 
 export type Clock = () => string;

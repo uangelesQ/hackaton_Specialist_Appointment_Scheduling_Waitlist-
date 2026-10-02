@@ -215,6 +215,42 @@ describe('repositories', () => {
     });
   });
 
+  describe('patients.setPreference (1.2, v2.5)', () => {
+    it('returns the previous value: null first, then the earlier choice', async () => {
+      const { patients } = createRepositories(db, clock);
+      await db('patients').where({ id: 5 }).update({ contact_preference: null });
+      expect(await patients.setPreference(5, 'in_app')).toBeNull();
+      expect(await patients.setPreference(5, 'telephone')).toBe('in_app');
+      expect(await patients.preferenceOf(5)).toBe('telephone');
+    });
+
+    it('returns undefined for a patient that does not exist and writes nothing', async () => {
+      expect(await createRepositories(db, clock).patients.setPreference(99, 'in_app')).toBeUndefined();
+    });
+  });
+
+  describe('audit: preference values (1.2, v2.5)', () => {
+    it('round-trips the patient and the previous and new values', async () => {
+      const { audit } = createRepositories(db, clock);
+      await audit.record({
+        action: 'contact_preference_set',
+        actorType: 'patient',
+        actorId: 1,
+        patientId: 1,
+        previousValue: null,
+        newValue: 'telephone',
+      });
+      const [row] = await audit.list();
+      expect(row).toMatchObject({ patientId: 1, previousValue: null, newValue: 'telephone' });
+    });
+
+    it('leaves the new fields null when a caller does not pass them', async () => {
+      const { audit } = createRepositories(db, clock);
+      await audit.record({ action: 'entry_removed', actorType: 'staff', actorId: 1 });
+      expect((await audit.list())[0]).toMatchObject({ patientId: null, previousValue: null, newValue: null });
+    });
+  });
+
   describe('withTransaction', () => {
     it('commits every write when the callback succeeds', async () => {
       const result = await withTransaction(
