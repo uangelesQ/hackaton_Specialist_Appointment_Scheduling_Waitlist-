@@ -47,7 +47,7 @@
 
 ## 9. Sign-in registration form (demo-registration)
 
-- [ ] 9.1 Write failing tests, then add a "Register (demo)" form to `LoginScreen`: name field, in-app and telephone options, a Register button disabled until both are given; on success sign in as the new patient; show the missing-field and duplicate-name messages; tell a duplicate they can sign in as that patient instead; the form is shown only because the demo sign-in screen is shown (the screen itself is the demo-only screen). Verify the tests pass. *(A person can register in the demonstration environment; A name already in use is refused)*
+- [x] 9.1 Write failing tests, then add a "Register (demo)" form to `LoginScreen`: name field, in-app and telephone options, a Register button disabled until both are given; on success sign in as the new patient; show the missing-field and duplicate-name messages; tell a duplicate they can sign in as that patient instead; the form is shown only because the demo sign-in screen is shown (the screen itself is the demo-only screen). Verify the tests pass. *(A person can register in the demonstration environment; A name already in use is refused)*
 
 ## 10. Documentation, walkthrough data and full verification
 
