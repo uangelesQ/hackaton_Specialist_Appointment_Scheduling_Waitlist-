@@ -7,11 +7,11 @@ Defines how staff release an open slot to the waitlist, how the next patient is 
 ## Requirements
 
 ### Requirement: Staff releases an open slot
-The system SHALL let scheduling staff release an open slot, identified by a date and time they enter, to the waitlist. On release, the first eligible patient with status `waiting` SHALL change to `notified` and an offer for that slot SHALL be outstanding with that patient. An eligible patient is the one with the lowest position who has not already declined that slot. No slot SHALL be offered without this staff action.
+The system SHALL let scheduling staff release an open slot, identified by a date and time they enter, to the waitlist. On release, the next patient in line, as defined in `offer-targeting`, SHALL change to `notified` and an offer for that slot SHALL be outstanding with that patient. No slot SHALL be offered without this staff action (US-009, BR-005).
 
-#### Scenario: Release offers the slot to position 1
-- **WHEN** at least one patient is `waiting`, no offer is outstanding, and staff release a slot
-- **THEN** the lowest-position eligible patient becomes `notified` and holds an outstanding offer for that slot date and time
+#### Scenario: Release offers the slot to the next patient in line
+- **WHEN** at least one eligible patient is `waiting`, no offer is outstanding, and staff release a slot
+- **THEN** the next patient in line becomes `notified` and holds an outstanding offer for that slot date and time
 
 #### Scenario: No waiting patients
 - **WHEN** no patient has status `waiting`
@@ -33,18 +33,18 @@ The system SHALL allow at most one outstanding offer at any time. While an offer
 - **THEN** exactly one offer is created and the other request is rejected
 
 ### Requirement: Notified patient sees an in-app banner
-The system SHALL show the patient holding an outstanding offer an in-app banner on their waitlist view announcing the open slot, with its date, time and specialist. There SHALL be no persistent notification list; a patient not viewing the application sees the offer the next time they open it, and the offer remains outstanding until answered, passed on or closed.
+The system SHALL show a patient whose contact preference is `in_app` and who holds the outstanding offer an in-app banner on their waitlist view announcing the open slot, with its date, time and specialist (US-003, BR-001). A patient whose preference is `telephone` or not recorded is not shown the banner (see `contact-preference`). There SHALL be no persistent notification list; a patient not viewing the application sees the offer the next time they open it, and the offer remains outstanding until answered, passed on or closed.
 
-#### Scenario: Banner shown to offer holder
-- **WHEN** a patient with an outstanding offer opens their waitlist view
+#### Scenario: Banner shown to an in-app offer holder
+- **WHEN** an `in_app` patient with an outstanding offer opens their waitlist view
 - **THEN** a banner announces the open slot and shows the slot date, time and specialist
 
 #### Scenario: Other patients see no banner
-- **WHEN** a patient without an outstanding offer opens their waitlist view
+- **WHEN** a patient who does not hold the outstanding offer, or whose preference is not `in_app`, opens their waitlist view
 - **THEN** no offer banner is shown
 
 #### Scenario: Offer persists until next visit
-- **WHEN** a patient is notified while not viewing the application and opens it later
+- **WHEN** an `in_app` patient is notified while not viewing the application and opens it later
 - **THEN** the banner and offer are shown, provided the offer is still outstanding
 
 #### Scenario: Notification does not change position
@@ -52,7 +52,7 @@ The system SHALL show the patient holding an outstanding offer an in-app banner 
 - **THEN** their entry remains active at its existing position
 
 ### Requirement: Patient accepts an offer with confirmation
-The system SHALL, when the patient chooses to accept, first show a confirmation step restating the slot date, time and specialist with options to confirm or go back. On confirm the booking SHALL be completed for that slot and the entry SHALL become `booked`. On go back nothing SHALL change and the offer SHALL remain outstanding and answerable.
+The system SHALL, when a patient whose contact preference is `in_app` chooses to accept, first show a confirmation step restating the slot date, time and specialist with options to confirm or go back. On confirm the booking SHALL be completed for that slot and the entry SHALL become `booked`. On go back nothing SHALL change and the offer SHALL remain outstanding and answerable (US-008, BR-005). A patient whose preference is `telephone` or not recorded does not respond in the app; staff record their response (see `telephone-offer-response`).
 
 #### Scenario: Confirm acceptance
 - **WHEN** a patient with an outstanding offer accepts and then confirms
@@ -75,7 +75,7 @@ The system SHALL, when the patient chooses to accept, first show a confirmation 
 - **THEN** the system rejects the request and tells the patient the offer is no longer available
 
 ### Requirement: Patient declines an offer
-The system SHALL, when the patient declines, close that offer, return the entry to `waiting` at its existing position, and return the slot to staff to release again. The patient SHALL NOT be offered the same slot again but SHALL stay eligible for any future slot. The system SHALL NOT notify the next patient automatically.
+The system SHALL, when a patient whose contact preference is `in_app` declines, close that offer, return the entry to `waiting` at its existing position, and return the slot to staff to release again. The patient SHALL NOT be offered the same slot again but SHALL stay eligible for any future slot. The system SHALL NOT notify the next patient automatically (US-008, BR-005).
 
 #### Scenario: Decline keeps position
 - **WHEN** a patient with an outstanding offer declines
@@ -94,14 +94,14 @@ The system SHALL, when the patient declines, close that offer, return the entry 
 - **THEN** no release action is offered for that slot and it stays open
 
 ### Requirement: Staff passes an unanswered offer to the next patient
-The system SHALL let staff pass an outstanding offer on. The holder SHALL return to `waiting` at their existing position, and the next eligible waiting patient behind them in position order SHALL become `notified` with an outstanding offer for the same slot. If there is no such patient, the holder SHALL return to `waiting`, no new offer SHALL be raised, and the slot SHALL return to staff to release again.
+The system SHALL let staff pass an outstanding offer on. The holder SHALL return to `waiting` at their existing position and SHALL be passed over for that slot, and the next patient in line, as defined in `offer-targeting`, SHALL become `notified` with an outstanding offer for the same slot (US-010, BR-005). If there is no such patient, the holder SHALL return to `waiting`, no new offer SHALL be raised, and the slot SHALL return to staff to release again.
 
 #### Scenario: Pass offer to next patient
-- **WHEN** patient P holds an offer and staff pass it on, and another eligible patient is waiting behind P
-- **THEN** P is `waiting` at the same position and the next eligible patient is `notified` for the same slot
+- **WHEN** patient P holds an offer and staff pass it on, and another eligible patient is waiting
+- **THEN** P is `waiting` at the same position, P is passed over for that slot, and the next patient in line is `notified` for the same slot
 
 #### Scenario: Only patient on the waitlist
-- **WHEN** P holds an offer, is the only patient, and staff pass it on
+- **WHEN** P holds an offer, is the only eligible patient, and staff pass it on
 - **THEN** P returns to `waiting` and no new offer is raised
 
 #### Scenario: Pass-on is audited

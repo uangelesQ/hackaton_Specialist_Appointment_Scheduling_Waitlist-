@@ -26,15 +26,15 @@ The system SHALL order active entries by join time, earliest first, with no prio
 - **THEN** its position is unchanged
 
 ### Requirement: Patient views own position
-The system SHALL show a patient their current position as a plain number in the form "#N", together with the date they joined. The total number of patients waiting SHALL NOT be shown. The position SHALL reflect current state at the time of viewing.
+The system SHALL make a patient's current position available to their own view as a plain number, together with the date they joined, and SHALL NOT include the total number of patients waiting. The position SHALL reflect current state at the time of viewing (US-002, BR-006, BR-008). In this iteration the patient screen shows a status instead of the position (see `waitlist-screens`, "Patient sees their status, not a queue position"), because the product spec defers a patient-facing position.
 
-#### Scenario: Patient views position
-- **WHEN** a patient with an active entry views their waitlist status
-- **THEN** their position is displayed as "#N" with the join date, and no total count
+#### Scenario: Patient's view carries the position
+- **WHEN** a patient with an active entry requests their waitlist status
+- **THEN** the response includes their position as a number and the date they joined, and no total count
 
 #### Scenario: Position is current
 - **WHEN** another entry is added or closed and the patient then views their status
-- **THEN** the displayed position reflects that change
+- **THEN** the position in their view reflects that change
 
 #### Scenario: No active entry
 - **WHEN** a patient with no active entry views their status

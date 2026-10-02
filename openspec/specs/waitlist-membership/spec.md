@@ -62,7 +62,7 @@ The system SHALL let scheduling staff see the registered patients, each marked a
 - **THEN** the system denies the request and reveals no names
 
 ### Requirement: Patient removes themselves
-The system SHALL allow a patient to remove their own active entry. The entry becomes `removed`, is excluded from position calculations, and every entry behind it moves up one position.
+The system SHALL allow a patient to remove their own active entry. The entry becomes `removed`, is excluded from position calculations, and every entry behind it moves up one position (US-007, BR-002, BR-008). The API provides this; no screen offers it in this iteration (see `waitlist-screens`).
 
 #### Scenario: Patient leaves waitlist
 - **WHEN** a patient holding position N chooses to leave the waitlist
@@ -77,7 +77,7 @@ The system SHALL allow a patient to remove their own active entry. The entry bec
 - **THEN** the system rejects the request and the entry is unchanged
 
 ### Requirement: Staff removes a patient
-The system SHALL allow scheduling staff to remove any active entry, with the same effects as patient self-removal. No other party SHALL be able to remove an entry.
+The system SHALL allow scheduling staff to remove any active entry, with the same effects as patient self-removal. No other party SHALL be able to remove an entry (US-005, BR-002). The API provides this; no screen offers it in this iteration (see `waitlist-screens`).
 
 #### Scenario: Staff removes entry
 - **WHEN** a staff member removes an active entry at position N
